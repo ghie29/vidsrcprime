@@ -8,16 +8,30 @@ const IMG_BASE = 'https://image.tmdb.org/t/p/';
 // ============================================================
 // STREAMING SERVERS
 // ============================================================
+// Sandbox rules (applied to both servers):
+//   ✅ allow-scripts        → player needs JavaScript
+//   ✅ allow-same-origin    → player needs its own cookies/storage
+//   ✅ allow-forms          → some players submit hidden forms
+//   ✅ allow-presentation   → Chromecast/AirPlay
+//   ❌ allow-popups         → BLOCKED (no popup ads)
+//   ❌ allow-top-navigation → BLOCKED (no site hijacking)
+//   ❌ allow-modals         → BLOCKED (no alert/confirm)
+//   ❌ allow-downloads      → BLOCKED (no forced downloads)
+// ============================================================
+const IFRAME_SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-presentation';
+
 const SERVERS = {
     'pro': {
         name: 'PRO',
         movie: (id) => `https://web.nxsha.app/embed/movie/${id}/`,
-        tv: (id, s, e) => `https://web.nxsha.app/embed/tv/${id}/${s}/${e}/`
+        tv: (id, s, e) => `https://web.nxsha.app/embed/tv/${id}/${s}/${e}/`,
+        sandbox: IFRAME_SANDBOX
     },
     'pro2': {
         name: 'PRO 2',
         movie: (id) => `https://cinesrc.st/embed/movie/${id}`,
-        tv: (id, season, episode) => `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`
+        tv: (id, season, episode) => `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`,
+        sandbox: IFRAME_SANDBOX
     }
 };
 

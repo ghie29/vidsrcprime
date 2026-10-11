@@ -317,6 +317,7 @@ function WatchMoviePage() {
     const handleServerChange = (e) => { setServer(e.target.value); setIframeErr(false); };
 
     const renderIframe = () => {
+        const serverConfig = SERVERS[server] || SERVERS[DEFAULT_SERVER];
         const iframeProps = {
             src: embedUrl,
             width: '100%',
@@ -328,11 +329,9 @@ function WatchMoviePage() {
             title: 'Video player',
             referrerpolicy: 'no-referrer',
             loading: 'lazy',
+            sandbox: serverConfig.sandbox,
             onError: () => setIframeErr(true)
         };
-        if (server === 'pro') {
-            return html`<iframe ...${iframeProps} sandbox="allow-scripts allow-same-origin allow-forms allow-modals"/>`;
-        }
         return html`<iframe ...${iframeProps}/>`;
     };
 
@@ -419,6 +418,7 @@ function WatchTVPage() {
     const handleServerChange = (e) => { setServer(e.target.value); setIframeErr(false); };
 
     const renderIframe = () => {
+        const serverConfig = SERVERS[server] || SERVERS[DEFAULT_SERVER];
         const iframeProps = {
             src: embedUrl,
             width: '100%',
@@ -430,11 +430,9 @@ function WatchTVPage() {
             title: 'Video player',
             referrerpolicy: 'no-referrer',
             loading: 'lazy',
+            sandbox: serverConfig.sandbox,
             onError: () => setIframeErr(true)
         };
-        if (server === 'pro') {
-            return html`<iframe ...${iframeProps} sandbox="allow-scripts allow-same-origin allow-forms allow-modals"/>`;
-        }
         return html`<iframe ...${iframeProps}/>`;
     };
 
@@ -493,6 +491,84 @@ function WatchTVPage() {
                     </div>`}
             </div>
         </div>
+    </div>`;
+}
+
+// ============================================================
+// EMBED MOVIE PAGE — minimal, for third-party iframes
+// ============================================================
+function EmbedMoviePage() {
+    const { params } = useRouter();
+    const [iframeErr, setIframeErr] = useState(false);
+    const server = params.server || DEFAULT_SERVER;
+    const embedUrl = useMemo(() => getMovieEmbedUrl(params.id, server), [params.id, server]);
+    const serverConfig = SERVERS[server] || SERVERS[DEFAULT_SERVER];
+
+    useEffect(() => {
+        document.title = 'VidsRcprime Player';
+        document.body.style.background = '#000';
+        document.body.style.margin = '0';
+        return () => { document.body.style.background = ''; document.body.style.margin = ''; };
+    }, []);
+
+    const iframeProps = {
+        src: embedUrl,
+        width: '100%',
+        height: '100%',
+        frameborder: '0',
+        scrolling: 'no',
+        allow: 'autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write;',
+        allowFullScreen: true,
+        title: 'Video player',
+        referrerpolicy: 'no-referrer',
+        sandbox: serverConfig.sandbox,
+        onError: () => setIframeErr(true)
+    };
+
+    return html`<div style="${{ position: 'fixed', inset: 0, background: '#000' }}">
+        ${!iframeErr
+            ? html`<iframe ...${iframeProps}/>`
+            : html`<div className="absolute inset-0 flex items-center justify-center text-white text-sm">Unable to load player.</div>`}
+    </div>`;
+}
+
+// ============================================================
+// EMBED TV PAGE — minimal, for third-party iframes
+// ============================================================
+function EmbedTVPage() {
+    const { params } = useRouter();
+    const [iframeErr, setIframeErr] = useState(false);
+    const server = params.server || DEFAULT_SERVER;
+    const sNum = parseInt(params.season);
+    const eNum = parseInt(params.episode);
+    const embedUrl = useMemo(() => getTVEmbedUrl(params.id, sNum, eNum, server), [params.id, sNum, eNum, server]);
+    const serverConfig = SERVERS[server] || SERVERS[DEFAULT_SERVER];
+
+    useEffect(() => {
+        document.title = 'VidsRcprime Player';
+        document.body.style.background = '#000';
+        document.body.style.margin = '0';
+        return () => { document.body.style.background = ''; document.body.style.margin = ''; };
+    }, []);
+
+    const iframeProps = {
+        src: embedUrl,
+        width: '100%',
+        height: '100%',
+        frameborder: '0',
+        scrolling: 'no',
+        allow: 'autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write;',
+        allowFullScreen: true,
+        title: 'Video player',
+        referrerpolicy: 'no-referrer',
+        sandbox: serverConfig.sandbox,
+        onError: () => setIframeErr(true)
+    };
+
+    return html`<div style="${{ position: 'fixed', inset: 0, background: '#000' }}">
+        ${!iframeErr
+            ? html`<iframe ...${iframeProps}/>`
+            : html`<div className="absolute inset-0 flex items-center justify-center text-white text-sm">Unable to load player.</div>`}
     </div>`;
 }
 

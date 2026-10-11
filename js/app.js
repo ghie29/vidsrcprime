@@ -36,6 +36,22 @@ function parseRoute() {
         rp.season = s[3];
         rp.episode = s[4];
     }
+    // ============ EMBED ROUTES (for third-party iframes) ============
+    else if (s[0] === 'embed' && s[1] === 'movie' && s.length >= 3) {
+        page = 'embedMovie';
+        const idMatch = s[2].match(/^(\d+)/);
+        rp.id = idMatch ? idMatch[1] : s[2];
+        rp.server = qp.get('server') || null;
+    }
+    else if (s[0] === 'embed' && s[1] === 'tv' && s.length >= 5) {
+        page = 'embedTV';
+        const idMatch = s[2].match(/^(\d+)/);
+        rp.id = idMatch ? idMatch[1] : s[2];
+        rp.season = s[3];
+        rp.episode = s[4];
+        rp.server = qp.get('server') || null;
+    }
+    // ================================================================
     else if (s[0] === 'favorites') page = 'favorites';
     else if (s[0] === 'genres') page = 'genres';
     else if (s[0] === 'genre' && s.length === 3) { page = 'genreDetail'; rp.type = s[1]; rp.id = s[2]; }
@@ -111,6 +127,11 @@ function ScrollToTop() {
 // ============================================================
 function App() {
     const { page } = useRouter();
+
+    // Embed pages render WITHOUT navbar/footer (for third-party sites)
+    if (page === 'embedMovie') return html`<${EmbedMoviePage}/>`;
+    if (page === 'embedTV') return html`<${EmbedTVPage}/>`;
+
     const renderPage = () => {
         switch (page) {
             case 'home': return html`<${HomePage}/>`;
