@@ -500,9 +500,10 @@ function WatchTVPage() {
 function EmbedMoviePage() {
     const { params } = useRouter();
     const [iframeErr, setIframeErr] = useState(false);
-    const server = params.server || DEFAULT_SERVER;
+    const [server, setLocalServer] = useState(params.server || DEFAULT_SERVER);
     const embedUrl = useMemo(() => getMovieEmbedUrl(params.id, server), [params.id, server]);
     const serverConfig = SERVERS[server] || SERVERS[DEFAULT_SERVER];
+    const showControls = params.controls === '1';
 
     useEffect(() => {
         document.title = 'VidsRcprime Player';
@@ -510,6 +511,11 @@ function EmbedMoviePage() {
         document.body.style.margin = '0';
         return () => { document.body.style.background = ''; document.body.style.margin = ''; };
     }, []);
+
+    const handleServerChange = (e) => {
+        setLocalServer(e.target.value);
+        setIframeErr(false);
+    };
 
     const iframeProps = {
         src: embedUrl,
@@ -528,7 +534,25 @@ function EmbedMoviePage() {
     return html`<div style="${{ position: 'fixed', inset: 0, background: '#000' }}">
         ${!iframeErr
             ? html`<iframe ...${iframeProps}/>`
-            : html`<div className="absolute inset-0 flex items-center justify-center text-white text-sm">Unable to load player.</div>`}
+            : html`<div style="${{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', gap: 12, padding: 20, textAlign: 'center' }}">
+                <div style="${{ fontSize: 48 }}">⚠️</div>
+                <p style="${{ fontSize: 14, margin: 0 }}">Unable to load player. Try switching servers.</p>
+                <button
+                    onClick="${() => setIframeErr(false)}"
+                    style="${{ background: '#DC2626', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}"
+                >Retry</button>
+            </div>`}
+        ${showControls && html`<div style="${{ position: 'absolute', top: 12, right: 12, zIndex: 9999, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', padding: '6px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}">
+            <span style="${{ color: '#9CA3AF', fontSize: 11, userSelect: 'none' }}">Server:</span>
+            <select
+                value="${server}"
+                onChange="${handleServerChange}"
+                aria-label="Select streaming server"
+                style="${{ background: 'transparent', color: '#fff', border: 'none', outline: 'none', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 4px' }}"
+            >
+                ${SERVER_KEYS.map(key => html`<option key="${key}" value="${key}" style="${{ background: '#171717', color: '#fff', padding: 8 }}">${SERVERS[key].name}</option>`)}
+            </select>
+        </div>`}
     </div>`;
 }
 
@@ -538,11 +562,12 @@ function EmbedMoviePage() {
 function EmbedTVPage() {
     const { params } = useRouter();
     const [iframeErr, setIframeErr] = useState(false);
-    const server = params.server || DEFAULT_SERVER;
+    const [server, setLocalServer] = useState(params.server || DEFAULT_SERVER);
     const sNum = parseInt(params.season);
     const eNum = parseInt(params.episode);
     const embedUrl = useMemo(() => getTVEmbedUrl(params.id, sNum, eNum, server), [params.id, sNum, eNum, server]);
     const serverConfig = SERVERS[server] || SERVERS[DEFAULT_SERVER];
+    const showControls = params.controls === '1';
 
     useEffect(() => {
         document.title = 'VidsRcprime Player';
@@ -550,6 +575,11 @@ function EmbedTVPage() {
         document.body.style.margin = '0';
         return () => { document.body.style.background = ''; document.body.style.margin = ''; };
     }, []);
+
+    const handleServerChange = (e) => {
+        setLocalServer(e.target.value);
+        setIframeErr(false);
+    };
 
     const iframeProps = {
         src: embedUrl,
@@ -568,7 +598,25 @@ function EmbedTVPage() {
     return html`<div style="${{ position: 'fixed', inset: 0, background: '#000' }}">
         ${!iframeErr
             ? html`<iframe ...${iframeProps}/>`
-            : html`<div className="absolute inset-0 flex items-center justify-center text-white text-sm">Unable to load player.</div>`}
+            : html`<div style="${{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', gap: 12, padding: 20, textAlign: 'center' }}">
+                <div style="${{ fontSize: 48 }}">⚠️</div>
+                <p style="${{ fontSize: 14, margin: 0 }}">Unable to load player. Try switching servers.</p>
+                <button
+                    onClick="${() => setIframeErr(false)}"
+                    style="${{ background: '#DC2626', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}"
+                >Retry</button>
+            </div>`}
+        ${showControls && html`<div style="${{ position: 'absolute', top: 12, right: 12, zIndex: 9999, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', padding: '6px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}">
+            <span style="${{ color: '#9CA3AF', fontSize: 11, userSelect: 'none' }}">Server:</span>
+            <select
+                value="${server}"
+                onChange="${handleServerChange}"
+                aria-label="Select streaming server"
+                style="${{ background: 'transparent', color: '#fff', border: 'none', outline: 'none', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 4px' }}"
+            >
+                ${SERVER_KEYS.map(key => html`<option key="${key}" value="${key}" style="${{ background: '#171717', color: '#fff', padding: 8 }}">${SERVERS[key].name}</option>`)}
+            </select>
+        </div>`}
     </div>`;
 }
 

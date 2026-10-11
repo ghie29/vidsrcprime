@@ -42,6 +42,7 @@ function parseRoute() {
         const idMatch = s[2].match(/^(\d+)/);
         rp.id = idMatch ? idMatch[1] : s[2];
         rp.server = qp.get('server') || null;
+        rp.controls = qp.get('controls') || null;
     }
     else if (s[0] === 'embed' && s[1] === 'tv' && s.length >= 5) {
         page = 'embedTV';
@@ -50,6 +51,7 @@ function parseRoute() {
         rp.season = s[3];
         rp.episode = s[4];
         rp.server = qp.get('server') || null;
+        rp.controls = qp.get('controls') || null;
     }
     // ================================================================
     else if (s[0] === 'favorites') page = 'favorites';
