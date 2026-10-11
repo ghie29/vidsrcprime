@@ -2,7 +2,6 @@
 // ROUTER — Clean URLs (History API, no #)
 // ============================================================
 function parseRoute() {
-    // Use pathname instead of hash
     const path = window.location.pathname.replace(/\/+$/, '') || '/';
     const [pth, qstr] = path.split('?');
     const qp = new URLSearchParams(qstr || window.location.search);
@@ -53,10 +52,7 @@ function useRouter() {
     useEffect(() => {
         const handlePop = () => setRoute(parseRoute());
         window.addEventListener('popstate', handlePop);
-
-        // Also listen to custom 'navigate' event so anchor clicks work
         window.addEventListener('app:navigate', handlePop);
-
         return () => {
             window.removeEventListener('popstate', handlePop);
             window.removeEventListener('app:navigate', handlePop);
@@ -64,13 +60,11 @@ function useRouter() {
     }, []);
 
     const nav = useCallback((p) => {
-        // Normalize: strip a leading '#/' if someone passes it
         let target = p;
         if (target.startsWith('#/')) target = target.slice(1);
         if (target.startsWith('#')) target = target.slice(1);
         if (!target.startsWith('/')) target = '/' + target;
 
-        // If it's the same path, do nothing
         const current = window.location.pathname + window.location.search;
         if (current === target) return;
 
@@ -80,3 +74,73 @@ function useRouter() {
 
     return { ...route, navigate: nav };
 }
+
+// ============================================================
+// DATA FETCHING HOOK
+// ============================================================
+function useFetch(fn, deps = []) {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [retryCount, setRetryCount] = useState(0);
+
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true); setError(null); setData(null);
+        Promise.resolve(fn())
+            .then(d => { if (!cancelled) { setData(d); setLoading(false); } })
+            .catch(e => { if (!cancelled) { setError(e); setLoading(false); } });
+        return () => { cancelled = true; };
+    }, [...deps, retryCount]);
+
+    const retry = useCallback(() => setRetryCount(c => c + 1), []);
+    return { data, loading, error, retry };
+}
+
+// ============================================================
+// SCROLL TO TOP
+// ============================================================
+function ScrollToTop() {
+    const { page } = useRouter();
+    useEffect(() => { window.scrollTo(0, 0); }, [page]);
+    return null;
+}
+
+// ============================================================
+// APP
+// ============================================================
+function App() {
+    const { page } = useRouter();
+    const renderPage = () => {
+        switch (page) {
+            case 'home': return html`<${HomePage}/>`;
+            case 'search': return html`<${SearchPage}/>`;
+            case 'movieDetail': return html`<${MovieDetailPage}/>`;
+            case 'tvDetail': return html`<${TVDetailPage}/>`;
+            case 'watchMovie': return html`<${WatchMoviePage}/>`;
+            case 'watchTV': return html`<${WatchTVPage}/>`;
+            case 'favorites': return html`<${FavoritesPage}/>`;
+            case 'genres': return html`<${GenresPage}/>`;
+            case 'genreDetail': return html`<${GenreDetailPage}/>`;
+            case 'movies': return html`<${MoviesPage}/>`;
+            case 'tvShows': return html`<${TVShowsPage}/>`;
+            default: return html`<${NotFoundPage}/>`;
+        }
+    };
+    return html`<${ToastProvider}>
+        <${AppProvider}>
+            <${ScrollToTop}/>
+            <div className="min-h-screen bg-bg text-txt font-body">
+                <${Navbar}/>
+                <main>${renderPage()}</main>
+                <${Footer}/>
+            </div>
+        <//>
+    <//>`;
+}
+
+// ============================================================
+// MOUNT
+// ============================================================
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(html`<${App}/>`);
