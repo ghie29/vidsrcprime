@@ -1,0 +1,152 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: #080808;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton {
+    background: linear-gradient(90deg, #171717 25%, #262626 50%, #171717 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+
+.anim-fade { animation: fadeIn .6s ease both; }
+.anim-up { animation: slideUp .6s ease both; }
+.anim-down { animation: slideDown .3s ease both; }
+
+.scroll-row {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+}
+.scroll-row::-webkit-scrollbar { display: none; }
+.scroll-row > * { scroll-snap-align: start; flex-shrink: 0; }
+
+.hero-grad {
+    background:
+        linear-gradient(to right, rgba(8,8,8,.95) 0%, rgba(8,8,8,.7) 40%, transparent 70%),
+        linear-gradient(to top, rgba(8,8,8,1) 0%, rgba(8,8,8,.4) 40%, transparent 70%);
+}
+
+.card-hover { transition: transform .25s ease, box-shadow .25s ease; }
+.card-hover:hover { transform: scale(1.05); box-shadow: 0 8px 30px rgba(220,38,38,.15); }
+
+.nav-scrolled {
+    background: rgba(8,8,8,.85) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid #262626;
+}
+
+.btn-accent { background: #DC2626; color: #fff; transition: all .2s; }
+.btn-accent:hover { background: #EF4444; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(220,38,38,.4); }
+
+.btn-ghost { background: rgba(255,255,255,.1); color: #fff; backdrop-filter: blur(8px); transition: all .2s; }
+.btn-ghost:hover { background: rgba(255,255,255,.2); }
+
+.player-wrap { position: relative; width: 100%; padding-top: 56.25%; background: #000; }
+.player-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #262626;
+    color: #9CA3AF;
+}
+
+.ep-card { transition: background .2s; }
+.ep-card:hover { background: #1f1f1f; }
+
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(40px); } }
+.toast-in { animation: toastIn .3s ease both; }
+.toast-out { animation: toastOut .3s ease both; }
+
+.genre-card { transition: all .3s ease; }
+.genre-card:hover { transform: translateY(-4px); border-color: #DC2626; box-shadow: 0 8px 30px rgba(220,38,38,.2); }
+
+*:focus-visible { outline: 2px solid #DC2626; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+.watch-header-fixed { z-index: 999 !important; position: sticky; top: 0; }
+
+.server-selector-wrapper { position: relative; z-index: 9999 !important; }
+
+.server-selector {
+    background: rgba(255,255,255,.05);
+    border: 1px solid #262626;
+    border-radius: 8px;
+    padding: 4px 12px 4px 8px;
+    color: #9CA3AF;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+    transition: all .2s;
+    position: relative;
+    z-index: 99999 !important;
+    min-width: 120px;
+    height: 32px;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    padding-right: 28px;
+}
+.server-selector:hover {
+    border-color: #DC2626;
+    color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23DC2626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-color: rgba(220,38,38,.15);
+}
+.server-selector:focus { border-color: #DC2626; outline: 2px solid rgba(220,38,38,.3); }
+.server-selector option { background: #171717; color: #fff; padding: 8px; }
+
+.server-selector-overlay {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    outline: none;
+    padding: 2px 4px;
+    min-width: 80px;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 2px center;
+    padding-right: 18px;
+    position: relative;
+    z-index: 99999 !important;
+}
+.server-selector-overlay:hover { color: #fff; }
+.server-selector-overlay:focus { outline: none; }
+.server-selector-overlay option { background: #171717; color: #fff; padding: 8px; }
+
+.player-wrap .absolute { pointer-events: auto !important; }
+.player-wrap select { pointer-events: auto !important; }

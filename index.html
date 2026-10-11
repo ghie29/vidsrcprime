@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidsRcprime — Watch Movies & TV Shows</title>
+    <meta name="description" content="Watch movies and TV shows online in HD. Browse trending, popular, and top-rated content.">
+    <meta name="theme-color" content="#080808">
+
+    <meta property="og:site_name" content="VidsRcprime">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="assets/favicon.ico">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    bg: '#080808',
+                    'bg-s': '#111111',
+                    card: '#171717',
+                    'card-h': '#1f1f1f',
+                    bdr: '#262626',
+                    accent: '#DC2626',
+                    'accent-h': '#EF4444',
+                    'accent-d': '#991B1B',
+                    txt: '#FFFFFF',
+                    'txt-s': '#9CA3AF',
+                    'txt-m': '#6B7280',
+                },
+                fontFamily: {
+                    display: ['"Bebas Neue"', 'sans-serif'],
+                    body: ['"DM Sans"', 'sans-serif'],
+                }
+            }
+        }
+    }
+    </script>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/htm@3.1.1/dist/htm.js"></script>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/icons.js"></script>
+    <script src="js/context.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/pages.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
