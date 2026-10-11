@@ -5,12 +5,11 @@ function HomePage() {
     const { navigate } = useRouter();
     const { contW, removeFromContinue } = useApp();
     const { data: trendM, loading: lm } = useFetch(() => tmdb.trendingMovie(), []);
-    const { data: trendT, loading: lt } = useFetch(() => tmdb.trendingTV(), []);
-    const { data: popM, loading: lpm } = useFetch(() => tmdb.popularMovie(), []);
-    const { data: popT, loading: lpt } = useFetch(() => tmdb.popularTV(), []);
-    const { data: topM, loading: ltm } = useFetch(() => tmdb.topRatedMovie(), []);
-    const { data: topT, loading: ltt } = useFetch(() => tmdb.topRatedTV(), []);
-    const { data: upM, loading: lum } = useFetch(() => tmdb.upcomingMovie(), []);
+    const { data: popM } = useFetch(() => tmdb.popularMovie(), []);
+    const { data: popT } = useFetch(() => tmdb.popularTV(), []);
+    const { data: topM } = useFetch(() => tmdb.topRatedMovie(), []);
+    const { data: topT } = useFetch(() => tmdb.topRatedTV(), []);
+    const { data: upM } = useFetch(() => tmdb.upcomingMovie(), []);
 
     useEffect(() => { document.title = 'VidsRcprime — Watch Movies & TV Shows Online'; }, []);
 
@@ -124,20 +123,18 @@ function MovieDetailPage() {
     const [trailerKey, setTrailerKey] = useState(null);
 
     useEffect(() => {
-    if (data) {
-        const title = getTitle(data);
-        const slug = slugify(title);
-        document.title = `${title} — VidsRcprime`;
-        const currentSlug = params.slug || '';
-        const expectedSlug = `${data.id}-${slug}`;
-        // Optionally update URL slug for SEO if it's wrong, without reloading
-        if (currentSlug !== expectedSlug) {
-            window.history.replaceState({}, '', `/movie/${expectedSlug}`);
+        if (data) {
+            const title = getTitle(data);
+            const slug = slugify(title);
+            document.title = `${title} — VidsRcprime`;
+            const expectedSlug = `${data.id}-${slug}`;
+            if (params.slug !== expectedSlug) {
+                window.history.replaceState({}, '', `/movie/${expectedSlug}`);
+            }
+        } else {
+            document.title = 'Movie — VidsRcprime';
         }
-    } else {
-        document.title = 'Movie — VidsRcprime';
-    }
-}, [data, params.slug, params.id]);
+    }, [data, params.slug, params.id]);
 
     if (loading) return html`<${SkelDetail}/>`;
     if (error) return html`<div className="pt-24"><${ErrorState} msg="Failed to load movie details." onRetry="${retry}"/></div>`;
@@ -218,11 +215,9 @@ function TVDetailPage() {
             const slug = slugify(title);
             document.title = `${title} — VidsRcprime`;
             setSelectedSeason(1);
-            const currentSlug = params.slug || '';
             const expectedSlug = `${data.id}-${slug}`;
-            if (currentSlug !== expectedSlug && window.location.hash) {
-                const newHash = window.location.hash.replace(/tv\/[^\/]+/, `tv/${expectedSlug}`);
-                if (window.location.hash !== newHash) window.location.hash = newHash;
+            if (params.slug !== expectedSlug) {
+                window.history.replaceState({}, '', `/tv/${expectedSlug}`);
             }
         } else {
             document.title = 'TV Show — VidsRcprime';
@@ -282,7 +277,7 @@ function TVDetailPage() {
                 <${SeasonSelector} totalSeasons="${t.number_of_seasons || 1}" selected="${selectedSeason}" onSelect="${setSelectedSeason}"/>
                 ${seasonLoading
                     ? html`<div className="mt-4 space-y-3">${Array.from({ length: 5 }).map((_, i) => html`<div key="${i}" className="skeleton rounded-lg h-24"/>`)}</div>`
-                    : html`<${EpisodeList} episodes="${episodes}" showId="${t.id}" seasonNum="${selectedSeason}" navigate="${navigate}" addToContinue="${addToContinue}"/>`}
+                    : html`<${EpisodeList} episodes="${episodes}" showId="${t.id}" tvSlug="${slugify(getTitle(t))}" seasonNum="${selectedSeason}" navigate="${navigate}" addToContinue="${addToContinue}"/>`}
             </div>
             ${similar.length > 0 && html`<div className="mt-10 mb-8">
                 <h3 className="font-display text-xl md:text-2xl tracking-wider mb-4">SIMILAR SHOWS</h3>
@@ -310,11 +305,9 @@ function WatchMoviePage() {
             const title = getTitle(data);
             const slug = slugify(title);
             document.title = `Watch ${title} — VidsRcprime`;
-            const currentSlug = params.slug || '';
             const expectedSlug = `${data.id}-${slug}`;
-            if (currentSlug !== expectedSlug && window.location.hash) {
-                const newHash = window.location.hash.replace(/watch\/movie\/[^\/]+/, `watch/movie/${expectedSlug}`);
-                if (window.location.hash !== newHash) window.location.hash = newHash;
+            if (params.slug !== expectedSlug) {
+                window.history.replaceState({}, '', `/watch/movie/${expectedSlug}`);
             }
         } else {
             document.title = 'Watch — VidsRcprime';
@@ -355,7 +348,7 @@ function WatchMoviePage() {
                     <p className="text-txt-m text-sm mb-4">The streaming source may be temporarily unavailable. Try switching servers.</p>
                     <div className="flex gap-3">
                         <button onClick="${() => setIframeErr(false)}" className="btn-accent px-4 py-2 rounded-lg text-sm">Retry</button>
-                        <button onClick="${() => { const newServer = SERVER_KEYS.find(k => k !== server) || 'vidsrc'; setServer(newServer); setIframeErr(false); }}" className="btn-ghost px-4 py-2 rounded-lg text-sm">Switch Server</button>
+                        <button onClick="${() => { const newServer = SERVER_KEYS.find(k => k !== server) || SERVER_KEYS[0]; setServer(newServer); setIframeErr(false); }}" className="btn-ghost px-4 py-2 rounded-lg text-sm">Switch Server</button>
                     </div>
                 </div>`}
                 <div className="absolute top-3 left-3 z-[9999] flex items-center gap-2 bg-black/80 backdrop-blur-md rounded-lg px-2 py-1.5 border border-white/15 shadow-lg">
@@ -409,11 +402,9 @@ function WatchTVPage() {
             const title = getTitle(data);
             const slug = slugify(title);
             document.title = `Watch ${title} S${sNum}E${eNum} — VidsRcprime`;
-            const currentSlug = params.slug || '';
             const expectedSlug = `${data.id}-${slug}`;
-            if (currentSlug !== expectedSlug && window.location.hash) {
-                const newHash = window.location.hash.replace(/watch\/tv\/[^\/]+/, `watch/tv/${expectedSlug}`);
-                if (window.location.hash !== newHash) window.location.hash = newHash;
+            if (params.slug !== expectedSlug) {
+                window.history.replaceState({}, '', `/watch/tv/${expectedSlug}/${sNum}/${eNum}`);
             }
             addToContinue({ id: data.id, type: 'tv', poster_path: data.poster_path, name: data.name, first_air_date: data.first_air_date, season: sNum, episode: eNum });
         } else {
@@ -464,7 +455,7 @@ function WatchTVPage() {
                     <p className="text-txt-m text-sm mb-4">The streaming source may be temporarily unavailable. Try switching servers.</p>
                     <div className="flex gap-3">
                         <button onClick="${() => setIframeErr(false)}" className="btn-accent px-4 py-2 rounded-lg text-sm">Retry</button>
-                        <button onClick="${() => { const newServer = SERVER_KEYS.find(k => k !== server) || 'vidsrc'; setServer(newServer); setIframeErr(false); }}" className="btn-ghost px-4 py-2 rounded-lg text-sm">Switch Server</button>
+                        <button onClick="${() => { const newServer = SERVER_KEYS.find(k => k !== server) || SERVER_KEYS[0]; setServer(newServer); setIframeErr(false); }}" className="btn-ghost px-4 py-2 rounded-lg text-sm">Switch Server</button>
                     </div>
                 </div>`}
                 <div className="absolute top-3 left-3 z-[9999] flex items-center gap-2 bg-black/80 backdrop-blur-md rounded-lg px-2 py-1.5 border border-white/15 shadow-lg">

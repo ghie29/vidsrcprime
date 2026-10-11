@@ -96,24 +96,24 @@ function Navbar() {
         return () => window.removeEventListener('scroll', h);
     }, []);
 
-        const links = [
-            { label: 'Home', href: '/' },
-            { label: 'Movies', href: '/movies' },
-            { label: 'TV Shows', href: '/tvshows' },
-            { label: 'Genres', href: '/genres' },
-            { label: 'Search', href: '/search' },
-        ];
+    const links = [
+        { label: 'Home', href: '/' },
+        { label: 'Movies', href: '/movies' },
+        { label: 'TV Shows', href: '/tvshows' },
+        { label: 'Genres', href: '/genres' },
+        { label: 'Search', href: '/search' },
+    ];
 
     const closeMobile = useCallback(() => setMobileOpen(false), []);
 
     return html`<nav className="${`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'nav-scrolled' : 'bg-transparent'}`}" role="navigation" aria-label="Main navigation">
         <div className="max-w-[1440px] mx-auto px-4 md:px-5 h-16 flex items-center justify-between">
-            <a href="#/" className="flex items-center gap-2 group" aria-label="VidsRcprime Home" onClick="${(e) => { e.preventDefault(); navigate('/'); }}">
+            <a href="/" className="flex items-center gap-2 group" aria-label="VidsRcprime Home" onClick="${(e) => { e.preventDefault(); navigate('/'); }}">
                 <img src="${LOGO_URL}" alt="VidsRcprime" className="h-16 w-auto object-contain"/>
             </a>
             <div className="hidden md:flex items-center gap-1">
                 ${links.map(l => html`<a key="${l.href}" href="${l.href}" className="px-3 py-2 rounded-lg text-sm font-medium text-txt-s hover:text-white hover:bg-white/5 transition-all" onClick="${(e) => { e.preventDefault(); navigate(l.href); }}">${l.label}</a>`)}
-                <a href="#/favorites" className="relative ml-2 p-2 rounded-lg text-txt-s hover:text-white hover:bg-white/5 transition-all" onClick="${(e) => { e.preventDefault(); navigate('/favorites'); }}" aria-label="Favorites">
+                <a href="/favorites" className="relative ml-2 p-2 rounded-lg text-txt-s hover:text-white hover:bg-white/5 transition-all" onClick="${(e) => { e.preventDefault(); navigate('/favorites'); }}" aria-label="Favorites">
                     <${Icon} name="heart" size="18"/>
                     ${favs.length > 0 && html`<span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-accent rounded-full text-[10px] font-bold flex items-center justify-center">${favs.length}</span>`}
                 </a>
@@ -142,7 +142,7 @@ function MobileMenu({ links, favs, onClose, navigate }) {
             </div>
             <div className="p-4 flex flex-col gap-1">
                 ${links.map(l => html`<a key="${l.href}" href="${l.href}" className="px-4 py-3 rounded-lg text-txt-s hover:text-white hover:bg-white/5 transition-all font-medium" onClick="${(e) => { e.preventDefault(); navigate(l.href); onClose(); }}">${l.label}</a>`)}
-                <a href="#/favorites" className="px-4 py-3 rounded-lg text-txt-s hover:text-white hover:bg-white/5 transition-all font-medium flex items-center gap-2" onClick="${(e) => { e.preventDefault(); navigate('/favorites'); onClose(); }}">
+                <a href="/favorites" className="px-4 py-3 rounded-lg text-txt-s hover:text-white hover:bg-white/5 transition-all font-medium flex items-center gap-2" onClick="${(e) => { e.preventDefault(); navigate('/favorites'); onClose(); }}">
                     <${Icon} name="heart" size="16"/> Favorites ${favs > 0 ? html`<span className="ml-auto bg-accent/20 text-accent text-xs px-2 py-0.5 rounded-full">${favs}</span>` : null}
                 </a>
             </div>
@@ -156,8 +156,8 @@ function MobileMenu({ links, favs, onClose, navigate }) {
 function Footer() {
     const { navigate } = useRouter();
     const cols = [
-        { title: 'Browse', links: [{ l: 'Movies', h: '#/movies' }, { l: 'TV Shows', h: '#/tvshows' }, { l: 'Genres', h: '#/genres' }, { l: 'Search', h: '#/search' }] },
-        { title: 'Library', links: [{ l: 'Favorites', h: '#/favorites' }, { l: 'Continue Watching', h: '#/' }] },
+        { title: 'Browse', links: [{ l: 'Movies', h: '/movies' }, { l: 'TV Shows', h: '/tvshows' }, { l: 'Genres', h: '/genres' }, { l: 'Search', h: '/search' }] },
+        { title: 'Library', links: [{ l: 'Favorites', h: '/favorites' }, { l: 'Continue Watching', h: '/' }] },
     ];
     return html`<footer className="border-t border-bdr mt-16" role="contentinfo">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-12">
@@ -171,7 +171,7 @@ function Footer() {
                 ${cols.map(c => html`<div key="${c.title}">
                     <h4 className="font-semibold text-sm text-txt-s mb-3 uppercase tracking-wider">${c.title}</h4>
                     <ul className="flex flex-col gap-2">
-                        ${c.links.map(l => html`<li key="${l.h}"><a href="${l.h}" className="text-txt-m text-sm hover:text-white transition-colors" onClick="${(e) => { e.preventDefault(); navigate(l.h.replace('#', '')); }}">${l.l}</a></li>`)}
+                        ${c.links.map(l => html`<li key="${l.h}"><a href="${l.h}" className="text-txt-m text-sm hover:text-white transition-colors" onClick="${(e) => { e.preventDefault(); navigate(l.h); }}">${l.l}</a></li>`)}
                     </ul>
                 </div>`)}
             </div>
@@ -401,12 +401,13 @@ function SeasonSelector({ totalSeasons, selected, onSelect }) {
 // ============================================================
 // EPISODE LIST
 // ============================================================
-function EpisodeList({ episodes, showId, seasonNum, navigate, addToContinue }) {
+function EpisodeList({ episodes, showId, seasonNum, navigate, addToContinue, tvSlug }) {
     if (!episodes || !episodes.length) return html`<p className="text-txt-m text-sm mt-4">No episodes available.</p>`;
     return html`<div className="mt-4 flex flex-col gap-2">
         ${episodes.map((ep) => {
             const still = stillImg(ep.still_path);
-            return html`<div key="${ep.id}" className="ep-card flex gap-4 p-3 rounded-lg border border-bdr cursor-pointer" onClick="${() => { addToContinue({ id: showId, type: 'tv', poster_path: null, name: null, first_air_date: null, season: seasonNum, episode: ep.episode_number }); navigate(`/watch/tv/${showId}/${seasonNum}/${ep.episode_number}`); }}">
+            const slug = tvSlug || '';
+            return html`<div key="${ep.id}" className="ep-card flex gap-4 p-3 rounded-lg border border-bdr cursor-pointer" onClick="${() => { addToContinue({ id: showId, type: 'tv', poster_path: null, name: null, first_air_date: null, season: seasonNum, episode: ep.episode_number }); navigate(`/watch/tv/${showId}-${slug}/${seasonNum}/${ep.episode_number}`); }}">
                 <div className="relative w-[160px] sm:w-[200px] flex-shrink-0 rounded overflow-hidden" style="${{ aspectRatio: '16/9' }}">
                     ${still ? html`<img src="${still}" alt="" className="w-full h-full object-cover" loading="lazy"/>` : html`<div className="w-full h-full bg-card flex items-center justify-center"><${Icon} name="tv" size="24" className="text-txt-m"/></div>`}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity">
