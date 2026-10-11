@@ -96,13 +96,13 @@ function Navbar() {
         return () => window.removeEventListener('scroll', h);
     }, []);
 
-    const links = [
-        { label: 'Home', href: '#/' },
-        { label: 'Movies', href: '#/movies' },
-        { label: 'TV Shows', href: '#/tvshows' },
-        { label: 'Genres', href: '#/genres' },
-        { label: 'Search', href: '#/search' },
-    ];
+        const links = [
+            { label: 'Home', href: '/' },
+            { label: 'Movies', href: '/movies' },
+            { label: 'TV Shows', href: '/tvshows' },
+            { label: 'Genres', href: '/genres' },
+            { label: 'Search', href: '/search' },
+        ];
 
     const closeMobile = useCallback(() => setMobileOpen(false), []);
 

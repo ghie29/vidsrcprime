@@ -124,20 +124,20 @@ function MovieDetailPage() {
     const [trailerKey, setTrailerKey] = useState(null);
 
     useEffect(() => {
-        if (data) {
-            const title = getTitle(data);
-            const slug = slugify(title);
-            document.title = `${title} — VidsRcprime`;
-            const currentSlug = params.slug || '';
-            const expectedSlug = `${data.id}-${slug}`;
-            if (currentSlug !== expectedSlug && window.location.hash) {
-                const newHash = window.location.hash.replace(/movie\/[^\/]+/, `movie/${expectedSlug}`);
-                if (window.location.hash !== newHash) window.location.hash = newHash;
-            }
-        } else {
-            document.title = 'Movie — VidsRcprime';
+    if (data) {
+        const title = getTitle(data);
+        const slug = slugify(title);
+        document.title = `${title} — VidsRcprime`;
+        const currentSlug = params.slug || '';
+        const expectedSlug = `${data.id}-${slug}`;
+        // Optionally update URL slug for SEO if it's wrong, without reloading
+        if (currentSlug !== expectedSlug) {
+            window.history.replaceState({}, '', `/movie/${expectedSlug}`);
         }
-    }, [data, params.slug, params.id]);
+    } else {
+        document.title = 'Movie — VidsRcprime';
+    }
+}, [data, params.slug, params.id]);
 
     if (loading) return html`<${SkelDetail}/>`;
     if (error) return html`<div className="pt-24"><${ErrorState} msg="Failed to load movie details." onRetry="${retry}"/></div>`;
