@@ -2,15 +2,15 @@ export default {
     async fetch(request, env) {
         const url = new URL(request.url);
 
-        // Try to serve the real file first
-        let response = await env.ASSETS.fetch(request);
-
-        // If 404 AND it's an extensionless path → fallback to index.html
-        if (response.status === 404 && !url.pathname.match(/\.[a-zA-Z0-9]+$/)) {
-            const indexRequest = new Request(new URL('/index.html', url.origin), request);
-            response = await env.ASSETS.fetch(indexRequest);
+        // Serve real files directly (has extension like .js, .css, .png)
+        // If they don't exist, return 404 - do NOT fallback to index.html
+        if (/\.[a-zA-Z0-9]+$/.test(url.pathname)) {
+            return env.ASSETS.fetch(request);
         }
 
-        return response;
+        // For extensionless paths (/movies, /embed/movie/969681),
+        // serve index.html while keeping the URL intact
+        const indexRequest = new Request(new URL('/index.html', url.origin), request);
+        return env.ASSETS.fetch(indexRequest);
     }
 };
