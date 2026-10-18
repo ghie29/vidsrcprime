@@ -59,6 +59,7 @@ function parseRoute() {
     else if (s[0] === 'genre' && s.length === 3) { page = 'genreDetail'; rp.type = s[1]; rp.id = s[2]; }
     else if (s[0] === 'movies') page = 'movies';
     else if (s[0] === 'tvshows') page = 'tvShows';
+    else if (s[0] === 'api') page = 'api';
     else page = 'notFound';
 
     return { page, params: rp, query: qp };
@@ -147,6 +148,7 @@ function App() {
             case 'genreDetail': return html`<${GenreDetailPage}/>`;
             case 'movies': return html`<${MoviesPage}/>`;
             case 'tvShows': return html`<${TVShowsPage}/>`;
+            case 'api': return html`<${ApiDocsPage}/>`;
             default: return html`<${NotFoundPage}/>`;
         }
     };

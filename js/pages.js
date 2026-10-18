@@ -793,6 +793,313 @@ function TVShowsPage() {
 }
 
 // ============================================================
+// API DOCS PAGE
+// ============================================================
+function ApiDocsPage() {
+    const { addToast } = useToast();
+    const [copiedId, setCopiedId] = useState(null);
+
+    useEffect(() => { document.title = 'API Documentation — VidsRcprime'; }, []);
+
+    const origin = window.location.origin;
+
+    const copy = async (text, id) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopiedId(id);
+            addToast('Copied to clipboard!', 'success');
+            setTimeout(() => setCopiedId(null), 2000);
+        } catch {
+            addToast('Failed to copy', 'error');
+        }
+    };
+
+    const CodeBlock = ({ code, id }) => html`
+        <div className="relative group">
+            <pre className="bg-bg-s border border-bdr rounded-lg p-4 overflow-x-auto text-xs md:text-sm text-txt-s font-mono leading-relaxed whitespace-pre">
+<code>${code}</code>
+            </pre>
+            <button
+                onClick="${() => copy(code, id)}"
+                className="absolute top-2 right-2 px-2.5 py-1 rounded bg-card-h border border-bdr text-xs text-txt-s hover:text-white hover:border-accent transition-all opacity-0 group-hover:opacity-100 flex items-center gap-1.5"
+                aria-label="Copy code"
+            >
+                <${Icon} name="${copiedId === id ? 'check' : 'external'}" size="12"/>
+                ${copiedId === id ? 'Copied' : 'Copy'}
+            </button>
+        </div>
+    `;
+
+    const SectionWrap = ({ id, title, description, children }) => html`
+        <section id="${id}" className="mb-12 scroll-mt-24">
+            <h2 className="font-display text-2xl md:text-3xl tracking-wider text-white mb-2">${title}</h2>
+            ${description && html`<p className="text-txt-s text-sm mb-4 max-w-3xl">${description}</p>`}
+            ${children}
+        </section>
+    `;
+
+    const Endpoint = ({ method, path, description }) => html`
+        <div className="flex flex-wrap items-center gap-3 mb-3">
+            <span className="px-2 py-1 rounded bg-green-600/20 text-green-400 text-xs font-bold tracking-wider">${method}</span>
+            <code className="text-sm text-white font-mono bg-bg-s px-2 py-1 rounded border border-bdr">${path}</code>
+        </div>
+        ${description && html`<p className="text-txt-s text-sm mb-4">${description}</p>`}
+    `;
+
+    const ParamTable = ({ params }) => html`
+        <div className="overflow-x-auto mb-4">
+            <table className="w-full text-sm border border-bdr rounded-lg overflow-hidden">
+                <thead className="bg-bg-s">
+                    <tr>
+                        <th className="text-left p-3 text-txt-s font-medium text-xs uppercase tracking-wider">Name</th>
+                        <th className="text-left p-3 text-txt-s font-medium text-xs uppercase tracking-wider">Type</th>
+                        <th className="text-left p-3 text-txt-s font-medium text-xs uppercase tracking-wider">Required</th>
+                        <th className="text-left p-3 text-txt-s font-medium text-xs uppercase tracking-wider">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${params.map((p, i) => html`
+                        <tr key="${i}" className="border-t border-bdr">
+                            <td className="p-3 font-mono text-xs text-white">${p.name}</td>
+                            <td className="p-3 text-txt-s text-xs">${p.type}</td>
+                            <td className="p-3 text-xs">${p.required ? html`<span className="text-red-400">Yes</span>` : html`<span className="text-txt-m">No</span>`}</td>
+                            <td className="p-3 text-txt-s text-xs">${p.desc}</td>
+                        </tr>
+                    `)}
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    const MovieExample = `<iframe
+    src="${origin}/embed/movie/969681"
+    width="100%"
+    height="100%"
+    frameborder="0"
+    allowfullscreen
+    referrerpolicy="no-referrer"
+    style="aspect-ratio:16/9;max-width:100%;">
+</iframe>`;
+
+    const TVExample = `<iframe
+    src="${origin}/embed/tv/1396/1/1"
+    width="100%"
+    height="100%"
+    frameborder="0"
+    allowfullscreen
+    referrerpolicy="no-referrer"
+    style="aspect-ratio:16/9;max-width:100%;">
+</iframe>`;
+
+    const ControlsExample = `<iframe
+    src="${origin}/embed/movie/969681?controls=1"
+    width="100%"
+    height="100%"
+    frameborder="0"
+    allowfullscreen
+    referrerpolicy="no-referrer"
+    style="aspect-ratio:16/9;max-width:100%;">
+</iframe>`;
+
+    const ServerExample = `<iframe
+    src="${origin}/embed/movie/969681?server=pro2"
+    width="100%"
+    height="100%"
+    frameborder="0"
+    allowfullscreen
+    referrerpolicy="no-referrer"
+    style="aspect-ratio:16/9;max-width:100%;">
+</iframe>`;
+
+    const FullExample = `<iframe
+    src="${origin}/embed/movie/969681?server=pro2&controls=1"
+    width="100%"
+    height="100%"
+    frameborder="0"
+    allowfullscreen
+    referrerpolicy="no-referrer"
+    style="aspect-ratio:16/9;max-width:100%;">
+</iframe>`;
+
+    const ResponsiveExample = `<div style="position:relative;padding-top:56.25%;">
+    <iframe
+        src="${origin}/embed/movie/969681"
+        style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
+        allowfullscreen
+        referrerpolicy="no-referrer">
+    </iframe>
+</div>`;
+
+    const navItems = [
+        { id: 'overview', label: 'Overview' },
+        { id: 'quick-start', label: 'Quick Start' },
+        { id: 'endpoints', label: 'Endpoints' },
+        { id: 'parameters', label: 'Parameters' },
+        { id: 'examples', label: 'Examples' },
+        { id: 'security', label: 'Security' },
+    ];
+
+    return html`<div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-24 pb-16 anim-up">
+        <div className="mb-10">
+            <div className="flex items-center gap-3 mb-3">
+                <span className="px-2 py-1 rounded bg-accent/20 text-accent text-xs font-bold tracking-wider">API v1</span>
+                <span className="px-2 py-1 rounded bg-green-600/20 text-green-400 text-xs font-bold tracking-wider">PUBLIC</span>
+            </div>
+            <h1 className="font-display text-3xl md:text-5xl tracking-wider text-white mb-3">API DOCUMENTATION</h1>
+            <p className="text-txt-s text-sm md:text-base max-w-3xl">
+                Embed movies and TV shows from VidsRcprime into any website using a simple iframe. No API key required. Free to use.
+            </p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-10">
+            <aside className="lg:w-56 flex-shrink-0">
+                <div className="lg:sticky lg:top-24">
+                    <p className="text-xs text-txt-m uppercase tracking-wider mb-3 font-semibold">On This Page</p>
+                    <nav className="flex flex-col gap-1">
+                        ${navItems.map(item => html`
+                            <a
+                                key="${item.id}"
+                                href="#${item.id}"
+                                className="text-sm text-txt-s hover:text-white hover:bg-white/5 px-3 py-2 rounded-lg transition-all"
+                                onClick="${(e) => {
+                                    e.preventDefault();
+                                    document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }}"
+                            >${item.label}</a>
+                        `)}
+                    </nav>
+                </div>
+            </aside>
+
+            <div className="flex-1 min-w-0">
+                <${SectionWrap} id="overview" title="OVERVIEW" description="VidsRcprime Embed API lets you add a video player to any website with a single iframe. Supports movies and TV shows, with multiple streaming servers, optional server selector, and sandboxed playback for security.">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                        <div className="bg-card border border-bdr rounded-lg p-4">
+                            <p className="text-xs text-txt-m mb-1 uppercase tracking-wider">Base URL</p>
+                            <p className="text-sm text-white font-mono break-all">${origin}</p>
+                        </div>
+                        <div className="bg-card border border-bdr rounded-lg p-4">
+                            <p className="text-xs text-txt-m mb-1 uppercase tracking-wider">Response</p>
+                            <p className="text-sm text-white">HTML iframe content</p>
+                        </div>
+                        <div className="bg-card border border-bdr rounded-lg p-4">
+                            <p className="text-xs text-txt-m mb-1 uppercase tracking-wider">Auth</p>
+                            <p className="text-sm text-green-400">None required</p>
+                        </div>
+                    </div>
+                <//>
+
+                <${SectionWrap} id="quick-start" title="QUICK START" description="Paste this iframe into any HTML page to embed a movie. Replace the numeric ID with any TMDB movie ID.">
+                    <${CodeBlock} code="${MovieExample}" id="quick-movie"/>
+                    <p className="text-txt-s text-xs mt-3">
+                        💡 <strong>Tip:</strong> Find TMDB IDs at <a href="https://www.themoviedb.org/" target="_blank" rel="noopener" className="text-accent hover:underline">themoviedb.org</a> — the ID is in the URL of any movie page.
+                    </p>
+                <//>
+
+                <${SectionWrap} id="endpoints" title="ENDPOINTS" description="Two endpoints support movie and TV embeds.">
+                    <div className="bg-card border border-bdr rounded-lg p-5 mb-4">
+                        <${Endpoint} method="GET" path="/embed/movie/:id" description="Embed a movie by TMDB ID."/>
+                        <p className="text-txt-s text-xs mt-2">
+                            Example: <code className="text-accent">${origin}/embed/movie/969681</code>
+                        </p>
+                    </div>
+
+                    <div className="bg-card border border-bdr rounded-lg p-5">
+                        <${Endpoint} method="GET" path="/embed/tv/:id/:season/:episode" description="Embed a TV episode by TMDB show ID, season number, and episode number."/>
+                        <p className="text-txt-s text-xs mt-2">
+                            Example: <code className="text-accent">${origin}/embed/tv/1396/1/1</code>
+                        </p>
+                    </div>
+                <//>
+
+                <${SectionWrap} id="parameters" title="PARAMETERS" description="All parameters are optional and appended as query strings.">
+                    <${ParamTable} params="${[
+                        { name: 'server', type: 'string', required: false, desc: 'Force a specific streaming server: pro or pro2. Default: pro.' },
+                        { name: 'controls', type: 'string', required: false, desc: 'Set to 1 to show an on-screen server selector for viewers. Default: hidden.' },
+                    ]}"/>
+
+                    <p className="text-txt-s text-sm mt-6 mb-3 font-medium">Available Servers</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="bg-card border border-bdr rounded-lg p-3">
+                            <p className="text-sm font-mono text-white">pro</p>
+                            <p className="text-xs text-txt-m mt-1">Primary server — reliable, HD</p>
+                        </div>
+                        <div className="bg-card border border-bdr rounded-lg p-3">
+                            <p className="text-sm font-mono text-white">pro2</p>
+                            <p className="text-xs text-txt-m mt-1">Alternative server — backup source</p>
+                        </div>
+                    </div>
+                <//>
+
+                <${SectionWrap} id="examples" title="EXAMPLES">
+                    <div className="mb-8">
+                        <h3 className="text-sm font-semibold text-white mb-2">1. Basic TV Episode Embed</h3>
+                        <p className="text-txt-s text-xs mb-3">Embed a specific episode (Season 1, Episode 1) of Breaking Bad.</p>
+                        <${CodeBlock} code="${TVExample}" id="ex-tv"/>
+                    </div>
+
+                    <div className="mb-8">
+                        <h3 className="text-sm font-semibold text-white mb-2">2. With Server Selector</h3>
+                        <p className="text-txt-s text-xs mb-3">Viewers can switch servers if playback fails. Good for public sites.</p>
+                        <${CodeBlock} code="${ControlsExample}" id="ex-controls"/>
+                    </div>
+
+                    <div className="mb-8">
+                        <h3 className="text-sm font-semibold text-white mb-2">3. Force a Server</h3>
+                        <p className="text-txt-s text-xs mb-3">Lock playback to PRO 2. No selector shown.</p>
+                        <${CodeBlock} code="${ServerExample}" id="ex-server"/>
+                    </div>
+
+                    <div className="mb-8">
+                        <h3 className="text-sm font-semibold text-white mb-2">4. Force Server + Show Selector</h3>
+                        <p className="text-txt-s text-xs mb-3">Start on PRO 2, but let viewers switch to PRO.</p>
+                        <${CodeBlock} code="${FullExample}" id="ex-full"/>
+                    </div>
+
+                    <div>
+                        <h3 className="text-sm font-semibold text-white mb-2">5. Responsive 16:9 Container</h3>
+                        <p className="text-txt-s text-xs mb-3">Auto-scales with parent width. Works well on mobile.</p>
+                        <${CodeBlock} code="${ResponsiveExample}" id="ex-responsive"/>
+                    </div>
+                <//>
+
+                <${SectionWrap} id="security" title="SANDBOXING & SECURITY" description="The player runs in a sandboxed iframe with strict security restrictions.">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                        <div className="bg-green-600/10 border border-green-600/30 rounded-lg p-4">
+                            <p className="text-green-400 text-sm font-semibold mb-2">✅ Allowed</p>
+                            <ul className="text-txt-s text-xs space-y-1">
+                                <li>• Video playback</li>
+                                <li>• Fullscreen mode</li>
+                                <li>• Picture-in-picture</li>
+                                <li>• Cast to TV (Chromecast)</li>
+                            </ul>
+                        </div>
+                        <div className="bg-red-600/10 border border-red-600/30 rounded-lg p-4">
+                            <p className="text-red-400 text-sm font-semibold mb-2">🚫 Blocked</p>
+                            <ul className="text-txt-s text-xs space-y-1">
+                                <li>• Popup windows / new tabs</li>
+                                <li>• Redirecting your page</li>
+                                <li>• Forced downloads</li>
+                                <li>• Alert/confirm dialogs</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p className="text-txt-s text-xs">
+                        Your website is fully protected. The embedded player cannot escape the iframe or affect your site.
+                    </p>
+                <//>
+
+                <div className="mt-12 pt-8 border-t border-bdr">
+                    <p className="text-txt-m text-xs">
+                        Need help? Found an issue? Content available depends on third-party streaming sources. VidsRcprime does not host any video content.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+// ============================================================
 // 404 PAGE
 // ============================================================
 function NotFoundPage() {
