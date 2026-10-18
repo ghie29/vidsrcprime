@@ -155,6 +155,9 @@ function App() {
 
     // Don't show site ads on watch pages to keep the player clean
     const showSiteAd = page !== 'watchMovie' && page !== 'watchTV';
+    
+    // Add top padding on pages that don't normally have it (like Home)
+    const needsTopPadding = page === 'home';
 
     return html`<${ToastProvider}>
         <${AppProvider}>
@@ -162,8 +165,12 @@ function App() {
             <div className="min-h-screen bg-bg text-txt font-body flex flex-col">
                 <${Navbar}/>
                 <main className="flex-grow">
+                    ${showSiteAd && html`
+                        <div className="${needsTopPadding ? 'pt-20' : 'pt-24 md:pt-32'}">
+                            <${SiteAd} />
+                        </div>
+                    `}
                     ${renderPage()}
-                    ${showSiteAd && html`<${SiteAd} />`}
                 </main>
                 <${Footer}/>
             </div>
