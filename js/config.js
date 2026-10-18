@@ -48,14 +48,11 @@ function getTVEmbedUrl(id, s, e, serverKey = DEFAULT_SERVER) {
     return server.tv(id, s, e);
 }
 
-// ============================================================
-// AD CONFIG (magsrv / ExoClick)
-// ============================================================
 const AD_CONFIG = {
     providerUrl: 'https://a.magsrv.com/ad-provider.js',
     zoneId: '5688184',
     insClass: 'eas6a97888e10',
-    // Estimated size — adjust based on your zone config in ExoClick
     width: 300,
-    height: 250,
+    height: 100,
+    autoCloseMs: 0,  // ← 0 = never auto-close, or set to 30000 for 30s
 };

@@ -487,16 +487,14 @@ function AdBanner({ position = 'bottom' }) {
         const container = containerRef.current;
         container.innerHTML = '';
 
-        // Create the <ins> element for the ad
         const ins = document.createElement('ins');
         ins.className = AD_CONFIG.insClass;
         ins.setAttribute('data-zoneid', AD_CONFIG.zoneId);
         ins.style.display = 'block';
-        ins.style.width = '100%';
-        ins.style.minHeight = '50px';
+        ins.style.width = AD_CONFIG.width + 'px';
+        ins.style.height = AD_CONFIG.height + 'px';
         container.appendChild(ins);
 
-        // Load the ad provider script (only once)
         const SCRIPT_ID = 'magsrv-ad-provider';
         if (!document.getElementById(SCRIPT_ID)) {
             const script = document.createElement('script');
@@ -505,7 +503,6 @@ function AdBanner({ position = 'bottom' }) {
             script.type = 'application/javascript';
             script.src = AD_CONFIG.providerUrl;
             script.onload = () => {
-                // Initialize after provider loads
                 try {
                     window.AdProvider = window.AdProvider || [];
                     window.AdProvider.push({ serve: {} });
@@ -515,11 +512,9 @@ function AdBanner({ position = 'bottom' }) {
             };
             script.onerror = () => {
                 console.warn('[AdBanner] Failed to load ad provider');
-                setVisible(false);
             };
             document.head.appendChild(script);
         } else {
-            // Script already loaded — just push another serve request
             try {
                 window.AdProvider = window.AdProvider || [];
                 window.AdProvider.push({ serve: {} });
@@ -528,26 +523,18 @@ function AdBanner({ position = 'bottom' }) {
             }
         }
 
-        // Check if ad rendered (ExoClick injects an iframe into <ins>)
+        // Poll for ad content and set loaded once it appears
         const checkInterval = setInterval(() => {
-            if (ins.querySelector('iframe') || ins.children.length > 0) {
+            if (ins.children.length > 0 || ins.innerHTML.trim() !== '') {
                 setLoaded(true);
                 clearInterval(checkInterval);
             }
         }, 500);
 
-        // Auto-hide if ad doesn't load in 6 seconds (likely blocked)
-        const timeout = setTimeout(() => {
-            if (ins.children.length === 0) {
-                console.warn('[AdBanner] Ad did not load in 6s — hiding');
-                setVisible(false);
-            }
-            clearInterval(checkInterval);
-        }, 6000);
+        // NO auto-hide timeout — banner stays until user closes it
 
         return () => {
             clearInterval(checkInterval);
-            clearTimeout(timeout);
             container.innerHTML = '';
         };
     }, [visible]);
@@ -567,21 +554,19 @@ function AdBanner({ position = 'bottom' }) {
                 overflow: 'hidden',
                 border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
-                padding: 4,
             }}">
                 <div
                     ref="${containerRef}"
                     style="${{
+                        width: AD_CONFIG.width,
+                        height: AD_CONFIG.height,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         background: loaded ? 'transparent' : '#111',
-                        minWidth: loaded ? 'auto' : AD_CONFIG.width,
-                        minHeight: loaded ? 'auto' : AD_CONFIG.height,
-                        borderRadius: 4,
                     }}"
                 >
-                    ${!loaded && html`<span style="${{ color: '#666', fontSize: 11, padding: 20 }}">Loading ad...</span>`}
+                    ${!loaded && html`<span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>`}
                 </div>
                 <button
                     onClick="${() => setVisible(false)}"
