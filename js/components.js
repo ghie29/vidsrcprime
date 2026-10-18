@@ -97,12 +97,13 @@ function Navbar() {
     }, []);
 
     const links = [
-        { label: 'Home', href: '/' },
-        { label: 'Movies', href: '/movies' },
-        { label: 'TV Shows', href: '/tvshows' },
-        { label: 'Genres', href: '/genres' },
-        { label: 'Search', href: '/search' },
-    ];
+    { label: 'Home', href: '/' },
+    { label: 'Movies', href: '/movies' },
+    { label: 'TV Shows', href: '/tvshows' },
+    { label: 'Genres', href: '/genres' },
+    { label: 'Search', href: '/search' },
+    { label: 'API Docs', href: '/api' },
+];
 
     const closeMobile = useCallback(() => setMobileOpen(false), []);
 
@@ -156,12 +157,13 @@ function MobileMenu({ links, favs, onClose, navigate }) {
 function Footer() {
     const { navigate } = useRouter();
     const cols = [
-        { title: 'Browse', links: [{ l: 'Movies', h: '/movies' }, { l: 'TV Shows', h: '/tvshows' }, { l: 'Genres', h: '/genres' }, { l: 'Search', h: '/search' }] },
-        { title: 'Library', links: [{ l: 'Favorites', h: '/favorites' }, { l: 'Continue Watching', h: '/' }] },
-    ];
+    { title: 'Browse', links: [{ l: 'Movies', h: '/movies' }, { l: 'TV Shows', h: '/tvshows' }, { l: 'Genres', h: '/genres' }, { l: 'Search', h: '/search' }] },
+    { title: 'Library', links: [{ l: 'Favorites', h: '/favorites' }, { l: 'Continue Watching', h: '/' }] },
+    { title: 'Developers', links: [{ l: 'API Docs', h: '/api' }, { l: 'Embed Guide', h: '/api' }] },
+];
     return html`<footer className="border-t border-bdr mt-16" role="contentinfo">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                 <div className="col-span-2 md:col-span-2">
                     <div className="flex items-center gap-2 mb-4">
                         <img src="${LOGO_URL}" alt="" className="h-7 w-auto object-contain"/>
