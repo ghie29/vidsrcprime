@@ -479,21 +479,13 @@ function SearchBar({ value, onChange, placeholder = 'Search movies and TV shows.
 function AdBanner({ position = 'bottom' }) {
     const [visible, setVisible] = useState(true);
     const containerRef = useRef(null);
-    const adKey = useRef(`ad-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
     useEffect(() => {
         if (!visible || !containerRef.current) return;
-
         const container = containerRef.current;
-        const id = adKey.current;
-        container.id = id;
-
-        // Clean up previous ad script if any (from a previous mount)
         container.innerHTML = '';
 
-        // Injects atOptions + ad script in the right order
         try {
-            // 1. atOptions must be defined BEFORE the ad script loads
             const optsScript = document.createElement('script');
             optsScript.type = 'text/javascript';
             optsScript.text = `
@@ -507,21 +499,15 @@ function AdBanner({ position = 'bottom' }) {
             `;
             document.body.appendChild(optsScript);
 
-            // 2. Load the ad script (it reads window.atOptions)
             const adScript = document.createElement('script');
             adScript.type = 'text/javascript';
             adScript.src = AD_CONFIG.src;
             adScript.async = true;
-            adScript.onerror = () => {
-                console.warn('[AdBanner] Failed to load ad script');
-            };
             document.body.appendChild(adScript);
 
             return () => {
-                // Cleanup on unmount
                 try { document.body.removeChild(optsScript); } catch {}
                 try { document.body.removeChild(adScript); } catch {}
-                try { delete window.atOptions; } catch {}
             };
         } catch (err) {
             console.warn('[AdBanner] Error:', err);
@@ -535,16 +521,8 @@ function AdBanner({ position = 'bottom' }) {
         : { top: 60, left: '50%', transform: 'translateX(-50%)' };
 
     return html`
-        <div
-            className="fixed z-[9999] flex items-start"
-            style="${{
-                ...positionStyle,
-                gap: 0,
-                filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.6))',
-            }}"
-        >
-            <div style="${{ position: 'relative', background: '#000', borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}">
-                {/* Ad container — the ad script renders inside this */}
+        <div className="fixed z-[9999]" style="${positionStyle}">
+            <div style="${{ position: 'relative', background: '#000', borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }}">
                 <div
                     ref="${containerRef}"
                     style="${{
@@ -558,7 +536,6 @@ function AdBanner({ position = 'bottom' }) {
                 >
                     <span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>
                 </div>
-                {/* Close button — top right corner */}
                 <button
                     onClick="${() => setVisible(false)}"
                     aria-label="Close ad"
@@ -581,13 +558,8 @@ function AdBanner({ position = 'bottom' }) {
                         lineHeight: 1,
                         padding: 0,
                         boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-                        transition: 'transform 0.15s',
                     }}"
-                    onMouseEnter="${(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}"
-                    onMouseLeave="${(e) => { e.currentTarget.style.transform = 'scale(1)'; }}"
-                >
-                    ×
-                </button>
+                >×</button>
             </div>
         </div>
     `;
