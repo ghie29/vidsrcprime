@@ -506,21 +506,15 @@ function AdBanner({ position = 'bottom' }) {
                 try {
                     window.AdProvider = window.AdProvider || [];
                     window.AdProvider.push({ serve: {} });
-                } catch (e) {
-                    console.warn('[AdBanner] Serve error:', e);
-                }
+                } catch (e) {}
             };
-            script.onerror = () => {
-                console.warn('[AdBanner] Failed to load ad provider');
-            };
+            script.onerror = () => {};
             document.head.appendChild(script);
         } else {
             try {
                 window.AdProvider = window.AdProvider || [];
                 window.AdProvider.push({ serve: {} });
-            } catch (e) {
-                console.warn('[AdBanner] Serve error:', e);
-            }
+            } catch (e) {}
         }
 
         const checkInterval = setInterval(() => {
@@ -544,17 +538,12 @@ function AdBanner({ position = 'bottom' }) {
 
     return html`
         <div className="fixed z-[9999]" style="${positionStyle}">
-            {/* 
-              Outer wrapper gives 8px of padding all around so the close button 
-              fits perfectly without being cut off. 
-              Total size: 316x116 (300x100 ad + 8px padding + 8px padding)
-            */}
             <div style="${{
                 position: 'relative',
                 padding: '8px',
                 background: 'transparent',
+                width: '316px',
             }}">
-                {/* The actual Ad Box (300x100) */}
                 <div style="${{
                     background: '#000',
                     borderRadius: 6,
@@ -565,8 +554,8 @@ function AdBanner({ position = 'bottom' }) {
                     <div
                         ref="${containerRef}"
                         style="${{
-                            width: AD_CONFIG.width,
-                            height: AD_CONFIG.height,
+                            width: AD_CONFIG.width + 'px',
+                            height: AD_CONFIG.height + 'px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -576,8 +565,6 @@ function AdBanner({ position = 'bottom' }) {
                         ${!loaded && html`<span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>`}
                     </div>
                 </div>
-
-                {/* Close Button — perfectly positioned at the top-right corner */}
                 <button
                     onClick="${() => setVisible(false)}"
                     aria-label="Close ad"
