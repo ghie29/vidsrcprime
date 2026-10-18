@@ -24,7 +24,12 @@ function HomePage() {
 
     return html`<div>
         <${Hero} items="${heroItems}"/>
-        <div className="-mt-8 relative z-10">
+        
+        <div className="relative z-20 -mt-6 mb-4">
+            <${SiteAd} />
+        </div>
+
+        <div className="relative z-10">
             ${contW.length > 0 && html`<${Section} title="Continue Watching" items="${contW}" renderCard="${cwCard}" navigate="${navigate}"/>`}
             <${Section} title="Trending Movies" items="${trendM?.results || []}" renderCard="${card}" seeAllHref="/movies" navigate="${navigate}"/>
             ${lm && html`<div className="px-4 md:px-8 max-w-[1440px] mx-auto mb-8"><${SkelHero}/></div>`}
@@ -184,6 +189,9 @@ function MovieDetailPage() {
                 </div>
             </div>
             <${CastList} cast="${cast}"/>
+            
+            <${SiteAd} />
+
             ${similar.length > 0 && html`<div className="mt-10 mb-8">
                 <h3 className="font-display text-xl md:text-2xl tracking-wider mb-4">YOU MAY ALSO LIKE</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -279,6 +287,9 @@ function TVDetailPage() {
                     ? html`<div className="mt-4 space-y-3">${Array.from({ length: 5 }).map((_, i) => html`<div key="${i}" className="skeleton rounded-lg h-24"/>`)}</div>`
                     : html`<${EpisodeList} episodes="${episodes}" showId="${t.id}" tvSlug="${slugify(getTitle(t))}" seasonNum="${selectedSeason}" navigate="${navigate}" addToContinue="${addToContinue}"/>`}
             </div>
+
+            <${SiteAd} />
+
             ${similar.length > 0 && html`<div className="mt-10 mb-8">
                 <h3 className="font-display text-xl md:text-2xl tracking-wider mb-4">SIMILAR SHOWS</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -366,6 +377,9 @@ function WatchMoviePage() {
                 </div>
                 <p className="text-txt-s text-sm mt-3 max-w-3xl">${data.overview || ''}</p>
             </div>`}
+            
+            <${SiteAd} />
+
             ${data && (data.recommendations?.results?.length || data.similar?.results?.length) > 0 && html`<div className="px-4 md:px-8 pb-10">
                 <h3 className="font-display text-xl tracking-wider mb-4">RECOMMENDED</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -472,6 +486,9 @@ function WatchTVPage() {
                 </div>
                 <p className="text-txt-s text-sm mt-3 max-w-3xl">${currentEp.overview || ''}</p>
             </div>`}
+            
+            <${SiteAd} />
+
             <div className="px-4 md:px-8 pb-10">
                 <h3 className="font-display text-xl tracking-wider mb-4">SEASON ${sNum} EPISODES</h3>
                 ${sLoading
