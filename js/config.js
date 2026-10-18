@@ -56,3 +56,23 @@ const AD_CONFIG = {
     height: 100,
     autoCloseMs: 0,  // ← 0 = never auto-close, or set to 30000 for 30s
 };
+
+// ============================================================
+// SITE ADS CONFIG (For main pages)
+// ============================================================
+const SITE_ADS = {
+    desktop: {
+        key: '46c115587562e876a39fd0c0a600ee66',
+        src: 'https://bancadeltempoidea.org/22/46c115587562e876a39fd0c0a600ee66',
+        width: 728,
+        height: 90,
+        format: 'iframe'
+    },
+    mobile: {
+        key: 'ae520275bc841c0df62a9b581a262572',
+        src: 'https://bancadeltempoidea.org/22/ae520275bc841c0df62a9b581a262572',
+        width: 320,
+        height: 50,
+        format: 'iframe'
+    }
+};

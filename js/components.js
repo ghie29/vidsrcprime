@@ -592,3 +592,98 @@ function AdBanner({ position = 'bottom' }) {
         </div>
     `;
 }
+
+// ============================================================
+// SITE AD — Responsive banner for main website pages
+// ============================================================
+function SiteAd() {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [loaded, setLoaded] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        if (!containerRef.current) return;
+        
+        const container = containerRef.current;
+        const config = isMobile ? SITE_ADS.mobile : SITE_ADS.desktop;
+        
+        container.innerHTML = '';
+        setLoaded(false);
+
+        try {
+            // 1. Define window.atOptions
+            const optsScript = document.createElement('script');
+            optsScript.type = 'text/javascript';
+            optsScript.text = `
+                window.atOptions = {
+                    'key': '${config.key}',
+                    'format': '${config.format}',
+                    'height': ${config.height},
+                    'width': ${config.width},
+                    'params': {}
+                };
+            `;
+            document.head.appendChild(optsScript);
+
+            // 2. Load the ad script
+            const adScript = document.createElement('script');
+            adScript.type = 'text/javascript';
+            adScript.src = config.src;
+            adScript.async = true;
+            
+            adScript.onload = () => {
+                setTimeout(() => {
+                    if (container.querySelector('iframe, img, ins')) {
+                        setLoaded(true);
+                    }
+                }, 500);
+            };
+
+            document.head.appendChild(adScript);
+
+            return () => {
+                try { optsScript.remove(); } catch {}
+                try { adScript.remove(); } catch {}
+                try { delete window.atOptions; } catch {}
+            };
+        } catch (err) {
+            console.warn('[SiteAd] Error:', err);
+        }
+    }, [isMobile]);
+
+    const config = isMobile ? SITE_ADS.mobile : SITE_ADS.desktop;
+
+    return html`
+        <div className="flex flex-col items-center justify-center my-8 w-full overflow-hidden">
+            <span className="text-[10px] text-txt-m uppercase tracking-widest mb-2">Advertisement</span>
+            <div 
+                className="relative bg-bg-s border border-bdr rounded-lg overflow-hidden flex items-center justify-center"
+                style="${{
+                    width: config.width + 'px',
+                    height: config.height + 'px',
+                    maxWidth: '100%'
+                }}"
+            >
+                <div 
+                    ref="${containerRef}" 
+                    style="${{
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: loaded ? 'transparent' : '#171717',
+                    }}"
+                >
+                    ${!loaded && html`<span className="text-txt-m text-xs animate-pulse">Loading ad...</span>`}
+                </div>
+            </div>
+        </div>
+    `;
+}

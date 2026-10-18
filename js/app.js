@@ -152,12 +152,19 @@ function App() {
             default: return html`<${NotFoundPage}/>`;
         }
     };
+
+    // Don't show site ads on watch pages to keep the player clean
+    const showSiteAd = page !== 'watchMovie' && page !== 'watchTV';
+
     return html`<${ToastProvider}>
         <${AppProvider}>
             <${ScrollToTop}/>
-            <div className="min-h-screen bg-bg text-txt font-body">
+            <div className="min-h-screen bg-bg text-txt font-body flex flex-col">
                 <${Navbar}/>
-                <main>${renderPage()}</main>
+                <main className="flex-grow">
+                    ${renderPage()}
+                    ${showSiteAd && html`<${SiteAd} />`}
+                </main>
                 <${Footer}/>
             </div>
         <//>
