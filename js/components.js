@@ -544,40 +544,50 @@ function AdBanner({ position = 'bottom' }) {
 
     return html`
         <div className="fixed z-[9999]" style="${positionStyle}">
+            {/* 
+              Outer wrapper gives 8px of padding all around so the close button 
+              fits perfectly without being cut off. 
+              Total size: 316x116 (300x100 ad + 8px padding + 8px padding)
+            */}
             <div style="${{
                 position: 'relative',
-                background: '#000',
-                borderRadius: 8,
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
+                padding: '8px',
+                background: 'transparent',
             }}">
-                <div
-                    ref="${containerRef}"
-                    style="${{
-                        width: AD_CONFIG.width,
-                        height: AD_CONFIG.height,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: loaded ? 'transparent' : '#111',
-                        borderRadius: 8,
-                        overflow: 'hidden',
-                    }}"
-                >
-                    ${!loaded && html`<span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>`}
+                {/* The actual Ad Box (300x100) */}
+                <div style="${{
+                    background: '#000',
+                    borderRadius: 6,
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
+                    overflow: 'hidden',
+                }}">
+                    <div
+                        ref="${containerRef}"
+                        style="${{
+                            width: AD_CONFIG.width,
+                            height: AD_CONFIG.height,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: loaded ? 'transparent' : '#111',
+                        }}"
+                    >
+                        ${!loaded && html`<span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>`}
+                    </div>
                 </div>
-                
-                {/* The Close Button — Now forced on top with a high z-index */}
+
+                {/* Close Button — perfectly positioned at the top-right corner */}
                 <button
                     onClick="${() => setVisible(false)}"
                     aria-label="Close ad"
                     style="${{
                         position: 'absolute',
-                        top: -12,
-                        right: -12,
-                        zIndex: 99999, // Forces it above the ad iframe
-                        width: 24,
-                        height: 24,
+                        top: 0,
+                        right: 0,
+                        zIndex: 99999,
+                        width: 22,
+                        height: 22,
                         borderRadius: '50%',
                         background: '#DC2626',
                         color: '#fff',
