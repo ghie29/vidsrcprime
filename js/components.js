@@ -599,8 +599,10 @@ function AdBanner({ position = 'bottom' }) {
 function SiteAd() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [loaded, setLoaded] = useState(false);
+    const [visible, setVisible] = useState(true);
     const containerRef = useRef(null);
 
+    // Handle screen resize
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
@@ -608,54 +610,72 @@ function SiteAd() {
     }, []);
 
     useEffect(() => {
-        if (!containerRef.current) return;
+        if (!containerRef.current || !visible) return;
         
         const container = containerRef.current;
         const config = isMobile ? SITE_ADS.mobile : SITE_ADS.desktop;
         
+        // Clear previous ad
         container.innerHTML = '';
         setLoaded(false);
 
-        try {
-            // 1. Define window.atOptions
-            const optsScript = document.createElement('script');
-            optsScript.type = 'text/javascript';
-            optsScript.text = `
-                window.atOptions = {
-                    'key': '${config.key}',
-                    'format': '${config.format}',
-                    'height': ${config.height},
-                    'width': ${config.width},
-                    'params': {}
+        // Small delay to ensure React has painted the container before the ad script runs
+        const initTimer = setTimeout(() => {
+            try {
+                // 1. Define window.atOptions
+                const optsScript = document.createElement('script');
+                optsScript.type = 'text/javascript';
+                optsScript.text = `
+                    window.atOptions = {
+                        'key': '${config.key}',
+                        'format': '${config.format}',
+                        'height': ${config.height},
+                        'width': ${config.width},
+                        'params': {}
+                    };
+                `;
+                document.head.appendChild(optsScript);
+
+                // 2. Load the ad script
+                const adScript = document.createElement('script');
+                adScript.type = 'text/javascript';
+                adScript.src = config.src;
+                adScript.async = true;
+                
+                adScript.onload = () => {
+                    // Check for the injected ad iframe
+                    setTimeout(() => {
+                        if (container.querySelector('iframe, img, ins') || container.innerHTML.length > 10) {
+                            setLoaded(true);
+                        }
+                    }, 500);
                 };
-            `;
-            document.head.appendChild(optsScript);
 
-            // 2. Load the ad script
-            const adScript = document.createElement('script');
-            adScript.type = 'text/javascript';
-            adScript.src = config.src;
-            adScript.async = true;
-            
-            adScript.onload = () => {
+                document.head.appendChild(adScript);
+
+                // 3. Safety timeout: If ad is blocked or fails, hide the whole section after 4 seconds
                 setTimeout(() => {
-                    if (container.querySelector('iframe, img, ins')) {
-                        setLoaded(true);
+                    if (!container.querySelector('iframe, img, ins') && container.innerHTML.length < 10) {
+                        console.warn('[SiteAd] Ad blocked or failed to load — hiding container');
+                        setVisible(false);
                     }
-                }, 500);
-            };
+                }, 4000);
 
-            document.head.appendChild(adScript);
+                // Cleanup function
+                return () => {
+                    try { optsScript.remove(); } catch {}
+                    try { adScript.remove(); } catch {}
+                    try { delete window.atOptions; } catch {}
+                };
+            } catch (err) {
+                console.warn('[SiteAd] Error:', err);
+            }
+        }, 100);
 
-            return () => {
-                try { optsScript.remove(); } catch {}
-                try { adScript.remove(); } catch {}
-                try { delete window.atOptions; } catch {}
-            };
-        } catch (err) {
-            console.warn('[SiteAd] Error:', err);
-        }
-    }, [isMobile]);
+        return () => clearTimeout(initTimer);
+    }, [isMobile, visible]);
+
+    if (!visible) return null;
 
     const config = isMobile ? SITE_ADS.mobile : SITE_ADS.desktop;
 
