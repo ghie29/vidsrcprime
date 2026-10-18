@@ -474,21 +474,26 @@ function SearchBar({ value, onChange, placeholder = 'Search movies and TV shows.
 
 
 // ============================================================
-// AD BANNER — atOptions ad with close button
+// AD BANNER — floating banner with close button
 // ============================================================
 function AdBanner({ position = 'bottom' }) {
     const [visible, setVisible] = useState(true);
-    const [loaded, setLoaded] = useState(false);
     const containerRef = useRef(null);
+    const adKey = useRef(`ad-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
     useEffect(() => {
         if (!visible || !containerRef.current) return;
 
         const container = containerRef.current;
+        const id = adKey.current;
+        container.id = id;
+
+        // Clean up previous ad script if any (from a previous mount)
         container.innerHTML = '';
 
+        // Injects atOptions + ad script in the right order
         try {
-            // 1. Inject atOptions BEFORE the script
+            // 1. atOptions must be defined BEFORE the ad script loads
             const optsScript = document.createElement('script');
             optsScript.type = 'text/javascript';
             optsScript.text = `
@@ -500,46 +505,26 @@ function AdBanner({ position = 'bottom' }) {
                     'params': {}
                 };
             `;
-            document.head.appendChild(optsScript);
+            document.body.appendChild(optsScript);
 
-            // 2. Inject the ad script
+            // 2. Load the ad script (it reads window.atOptions)
             const adScript = document.createElement('script');
             adScript.type = 'text/javascript';
             adScript.src = AD_CONFIG.src;
             adScript.async = true;
-
-            adScript.onload = () => {
-                setTimeout(() => {
-                    if (container.querySelector('iframe, img, ins')) {
-                        setLoaded(true);
-                    }
-                }, 500);
-            };
-
             adScript.onerror = () => {
-                console.warn('[AdBanner] Ad script failed to load');
-                setVisible(false);
+                console.warn('[AdBanner] Failed to load ad script');
             };
-
-            document.head.appendChild(adScript);
-
-            // 3. Timeout check (in case adblocker blocks it silently)
-            const timeout = setTimeout(() => {
-                if (!container.querySelector('iframe, img, ins')) {
-                    console.warn('[AdBanner] Ad blocked or failed to render');
-                    setVisible(false);
-                }
-            }, 4000);
+            document.body.appendChild(adScript);
 
             return () => {
-                clearTimeout(timeout);
-                try { optsScript.remove(); } catch {}
-                try { adScript.remove(); } catch {}
+                // Cleanup on unmount
+                try { document.body.removeChild(optsScript); } catch {}
+                try { document.body.removeChild(adScript); } catch {}
                 try { delete window.atOptions; } catch {}
             };
         } catch (err) {
             console.warn('[AdBanner] Error:', err);
-            setVisible(false);
         }
     }, [visible]);
 
@@ -550,46 +535,41 @@ function AdBanner({ position = 'bottom' }) {
         : { top: 60, left: '50%', transform: 'translateX(-50%)' };
 
     return html`
-        <div className="fixed z-[9999]" style="${positionStyle}">
-            <div style="${{
-                position: 'relative',
-                padding: '8px',
-                background: 'transparent',
-                width: (AD_CONFIG.width + 16) + 'px', // 320 + 16 padding = 336px
-            }}">
-                <div style="${{
-                    background: '#000',
-                    borderRadius: 6,
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
-                    overflow: 'hidden',
-                }}">
-                    <div
-                        ref="${containerRef}"
-                        style="${{
-                            width: AD_CONFIG.width + 'px',
-                            height: AD_CONFIG.height + 'px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: loaded ? 'transparent' : '#111',
-                        }}"
-                    >
-                        ${!loaded && html`<span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>`}
-                    </div>
+        <div
+            className="fixed z-[9999] flex items-start"
+            style="${{
+                ...positionStyle,
+                gap: 0,
+                filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.6))',
+            }}"
+        >
+            <div style="${{ position: 'relative', background: '#000', borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}">
+                {/* Ad container — the ad script renders inside this */}
+                <div
+                    ref="${containerRef}"
+                    style="${{
+                        width: AD_CONFIG.width,
+                        height: AD_CONFIG.height,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#111',
+                    }}"
+                >
+                    <span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>
                 </div>
+                {/* Close button — top right corner */}
                 <button
                     onClick="${() => setVisible(false)}"
                     aria-label="Close ad"
                     style="${{
                         position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        zIndex: 99999,
-                        width: 22,
-                        height: 22,
+                        top: -10,
+                        right: -10,
+                        width: 24,
+                        height: 24,
                         borderRadius: '50%',
-                        background: '#DC2626',
+                        background: 'rgba(220,38,38,0.95)',
                         color: '#fff',
                         border: '2px solid #000',
                         cursor: 'pointer',
@@ -601,8 +581,13 @@ function AdBanner({ position = 'bottom' }) {
                         lineHeight: 1,
                         padding: 0,
                         boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                        transition: 'transform 0.15s',
                     }}"
-                >×</button>
+                    onMouseEnter="${(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}"
+                    onMouseLeave="${(e) => { e.currentTarget.style.transform = 'scale(1)'; }}"
+                >
+                    ×
+                </button>
             </div>
         </div>
     `;
