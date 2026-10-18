@@ -523,15 +523,12 @@ function AdBanner({ position = 'bottom' }) {
             }
         }
 
-        // Poll for ad content and set loaded once it appears
         const checkInterval = setInterval(() => {
             if (ins.children.length > 0 || ins.innerHTML.trim() !== '') {
                 setLoaded(true);
                 clearInterval(checkInterval);
             }
         }, 500);
-
-        // NO auto-hide timeout — banner stays until user closes it
 
         return () => {
             clearInterval(checkInterval);
@@ -551,7 +548,6 @@ function AdBanner({ position = 'bottom' }) {
                 position: 'relative',
                 background: '#000',
                 borderRadius: 8,
-                overflow: 'hidden',
                 border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
             }}">
@@ -564,21 +560,26 @@ function AdBanner({ position = 'bottom' }) {
                         alignItems: 'center',
                         justifyContent: 'center',
                         background: loaded ? 'transparent' : '#111',
+                        borderRadius: 8,
+                        overflow: 'hidden',
                     }}"
                 >
                     ${!loaded && html`<span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>`}
                 </div>
+                
+                {/* The Close Button — Now forced on top with a high z-index */}
                 <button
                     onClick="${() => setVisible(false)}"
                     aria-label="Close ad"
                     style="${{
                         position: 'absolute',
-                        top: -10,
-                        right: -10,
+                        top: -12,
+                        right: -12,
+                        zIndex: 99999, // Forces it above the ad iframe
                         width: 24,
                         height: 24,
                         borderRadius: '50%',
-                        background: 'rgba(220,38,38,0.95)',
+                        background: '#DC2626',
                         color: '#fff',
                         border: '2px solid #000',
                         cursor: 'pointer',
