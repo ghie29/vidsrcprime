@@ -553,6 +553,7 @@ function EmbedMoviePage() {
                 ${SERVER_KEYS.map(key => html`<option key="${key}" value="${key}" style="${{ background: '#171717', color: '#fff', padding: 8 }}">${SERVERS[key].name}</option>`)}
             </select>
         </div>`}
+        <${AdBanner} position="bottom"/>
     </div>`;
 }
 
@@ -617,6 +618,7 @@ function EmbedTVPage() {
                 ${SERVER_KEYS.map(key => html`<option key="${key}" value="${key}" style="${{ background: '#171717', color: '#fff', padding: 8 }}">${SERVERS[key].name}</option>`)}
             </select>
         </div>`}
+        <${AdBanner} position="bottom"/>
     </div>`;
 }
 

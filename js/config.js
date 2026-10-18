@@ -47,3 +47,16 @@ function getTVEmbedUrl(id, s, e, serverKey = DEFAULT_SERVER) {
     const server = SERVERS[serverKey] || SERVERS[DEFAULT_SERVER];
     return server.tv(id, s, e);
 }
+
+// ============================================================
+// AD CONFIG
+// ============================================================
+const AD_CONFIG = {
+    key: 'b37da1bcd9178d24489b639caf7cfdb7',
+    width: 320,
+    height: 50,
+    format: 'iframe',
+    src: 'https://biomanos.org/22/b37da1bcd9178d24489b639caf7cfdb7',
+    // How long before the ad auto-closes (ms). Set 0 for no auto-close.
+    autoCloseMs: 0,
+};
