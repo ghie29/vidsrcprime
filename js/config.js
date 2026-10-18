@@ -48,11 +48,13 @@ function getTVEmbedUrl(id, s, e, serverKey = DEFAULT_SERVER) {
     return server.tv(id, s, e);
 }
 
+// ============================================================
+// AD CONFIG (bancadeltempoidea / atOptions)
+// ============================================================
 const AD_CONFIG = {
-    providerUrl: 'https://a.magsrv.com/ad-provider.js',
-    zoneId: '5688184',
-    insClass: 'eas6a97888e10',
-    width: 300,
-    height: 100,
-    autoCloseMs: 0,  // ← 0 = never auto-close, or set to 30000 for 30s
+    key: 'ae520275bc841c0df62a9b581a262572',
+    src: 'https://bancadeltempoidea.org/22/ae520275bc841c0df62a9b581a262572',
+    width: 320,
+    height: 50,
+    format: 'iframe',
 };

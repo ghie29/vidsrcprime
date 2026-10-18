@@ -474,7 +474,7 @@ function SearchBar({ value, onChange, placeholder = 'Search movies and TV shows.
 
 
 // ============================================================
-// AD BANNER — magsrv / ExoClick ad with close button
+// AD BANNER — atOptions ad with close button
 // ============================================================
 function AdBanner({ position = 'bottom' }) {
     const [visible, setVisible] = useState(true);
@@ -487,47 +487,60 @@ function AdBanner({ position = 'bottom' }) {
         const container = containerRef.current;
         container.innerHTML = '';
 
-        const ins = document.createElement('ins');
-        ins.className = AD_CONFIG.insClass;
-        ins.setAttribute('data-zoneid', AD_CONFIG.zoneId);
-        ins.style.display = 'block';
-        ins.style.width = AD_CONFIG.width + 'px';
-        ins.style.height = AD_CONFIG.height + 'px';
-        container.appendChild(ins);
+        try {
+            // 1. Inject atOptions BEFORE the script
+            const optsScript = document.createElement('script');
+            optsScript.type = 'text/javascript';
+            optsScript.text = `
+                window.atOptions = {
+                    'key': '${AD_CONFIG.key}',
+                    'format': '${AD_CONFIG.format}',
+                    'height': ${AD_CONFIG.height},
+                    'width': ${AD_CONFIG.width},
+                    'params': {}
+                };
+            `;
+            document.head.appendChild(optsScript);
 
-        const SCRIPT_ID = 'magsrv-ad-provider';
-        if (!document.getElementById(SCRIPT_ID)) {
-            const script = document.createElement('script');
-            script.id = SCRIPT_ID;
-            script.async = true;
-            script.type = 'application/javascript';
-            script.src = AD_CONFIG.providerUrl;
-            script.onload = () => {
-                try {
-                    window.AdProvider = window.AdProvider || [];
-                    window.AdProvider.push({ serve: {} });
-                } catch (e) {}
+            // 2. Inject the ad script
+            const adScript = document.createElement('script');
+            adScript.type = 'text/javascript';
+            adScript.src = AD_CONFIG.src;
+            adScript.async = true;
+
+            adScript.onload = () => {
+                setTimeout(() => {
+                    if (container.querySelector('iframe, img, ins')) {
+                        setLoaded(true);
+                    }
+                }, 500);
             };
-            script.onerror = () => {};
-            document.head.appendChild(script);
-        } else {
-            try {
-                window.AdProvider = window.AdProvider || [];
-                window.AdProvider.push({ serve: {} });
-            } catch (e) {}
+
+            adScript.onerror = () => {
+                console.warn('[AdBanner] Ad script failed to load');
+                setVisible(false);
+            };
+
+            document.head.appendChild(adScript);
+
+            // 3. Timeout check (in case adblocker blocks it silently)
+            const timeout = setTimeout(() => {
+                if (!container.querySelector('iframe, img, ins')) {
+                    console.warn('[AdBanner] Ad blocked or failed to render');
+                    setVisible(false);
+                }
+            }, 4000);
+
+            return () => {
+                clearTimeout(timeout);
+                try { optsScript.remove(); } catch {}
+                try { adScript.remove(); } catch {}
+                try { delete window.atOptions; } catch {}
+            };
+        } catch (err) {
+            console.warn('[AdBanner] Error:', err);
+            setVisible(false);
         }
-
-        const checkInterval = setInterval(() => {
-            if (ins.children.length > 0 || ins.innerHTML.trim() !== '') {
-                setLoaded(true);
-                clearInterval(checkInterval);
-            }
-        }, 500);
-
-        return () => {
-            clearInterval(checkInterval);
-            container.innerHTML = '';
-        };
     }, [visible]);
 
     if (!visible) return null;
@@ -542,7 +555,7 @@ function AdBanner({ position = 'bottom' }) {
                 position: 'relative',
                 padding: '8px',
                 background: 'transparent',
-                width: '316px',
+                width: (AD_CONFIG.width + 16) + 'px', // 320 + 16 padding = 336px
             }}">
                 <div style="${{
                     background: '#000',
