@@ -49,14 +49,13 @@ function getTVEmbedUrl(id, s, e, serverKey = DEFAULT_SERVER) {
 }
 
 // ============================================================
-// AD CONFIG
+// AD CONFIG (magsrv / ExoClick)
 // ============================================================
 const AD_CONFIG = {
-    key: 'b37da1bcd9178d24489b639caf7cfdb7',
-    width: 320,
-    height: 50,
-    format: 'iframe',
-    src: 'https://biomanos.org/22/b37da1bcd9178d24489b639caf7cfdb7',
-    // How long before the ad auto-closes (ms). Set 0 for no auto-close.
-    autoCloseMs: 0,
+    providerUrl: 'https://a.magsrv.com/ad-provider.js',
+    zoneId: '5688184',
+    insClass: 'eas6a97888e10',
+    // Estimated size — adjust based on your zone config in ExoClick
+    width: 300,
+    height: 250,
 };

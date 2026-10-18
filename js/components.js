@@ -474,77 +474,82 @@ function SearchBar({ value, onChange, placeholder = 'Search movies and TV shows.
 
 
 // ============================================================
-// AD BANNER — floating banner with close button
+// AD BANNER — magsrv / ExoClick ad with close button
 // ============================================================
 function AdBanner({ position = 'bottom' }) {
     const [visible, setVisible] = useState(true);
     const [loaded, setLoaded] = useState(false);
     const containerRef = useRef(null);
-    const scriptRef = useRef(null);
-    const optsScriptRef = useRef(null);
 
     useEffect(() => {
         if (!visible || !containerRef.current) return;
+
         const container = containerRef.current;
         container.innerHTML = '';
 
-        try {
-            // 1. Define window.atOptions FIRST
-            const optsScript = document.createElement('script');
-            optsScript.type = 'text/javascript';
-            optsScript.text = `
-                window.atOptions = {
-                    'key': '${AD_CONFIG.key}',
-                    'format': '${AD_CONFIG.format}',
-                    'height': ${AD_CONFIG.height},
-                    'width': ${AD_CONFIG.width},
-                    'params': {}
-                };
-            `;
-            document.head.appendChild(optsScript);
-            optsScriptRef.current = optsScript;
+        // Create the <ins> element for the ad
+        const ins = document.createElement('ins');
+        ins.className = AD_CONFIG.insClass;
+        ins.setAttribute('data-zoneid', AD_CONFIG.zoneId);
+        ins.style.display = 'block';
+        ins.style.width = '100%';
+        ins.style.minHeight = '50px';
+        container.appendChild(ins);
 
-            // 2. Then load the ad script
-            const adScript = document.createElement('script');
-            adScript.type = 'text/javascript';
-            adScript.src = AD_CONFIG.src;
-            adScript.async = true;
-
-            adScript.onload = () => {
-                // Check if iframe was injected by the ad network
-                setTimeout(() => {
-                    if (container.querySelector('iframe, img, ins')) {
-                        setLoaded(true);
-                    }
-                }, 1000);
+        // Load the ad provider script (only once)
+        const SCRIPT_ID = 'magsrv-ad-provider';
+        if (!document.getElementById(SCRIPT_ID)) {
+            const script = document.createElement('script');
+            script.id = SCRIPT_ID;
+            script.async = true;
+            script.type = 'application/javascript';
+            script.src = AD_CONFIG.providerUrl;
+            script.onload = () => {
+                // Initialize after provider loads
+                try {
+                    window.AdProvider = window.AdProvider || [];
+                    window.AdProvider.push({ serve: {} });
+                } catch (e) {
+                    console.warn('[AdBanner] Serve error:', e);
+                }
             };
-
-            adScript.onerror = () => {
-                console.warn('[AdBanner] Ad script failed to load');
+            script.onerror = () => {
+                console.warn('[AdBanner] Failed to load ad provider');
                 setVisible(false);
             };
-
-            document.head.appendChild(adScript);
-            scriptRef.current = adScript;
-
-            // 3. Auto-hide if ad didn't render within 4 seconds
-            const timeout = setTimeout(() => {
-                if (!container.querySelector('iframe, img, ins')) {
-                    console.warn('[AdBanner] Ad did not load in time (possibly blocked)');
-                    setVisible(false);
-                }
-            }, 4000);
-
-            return () => {
-                clearTimeout(timeout);
-                try { optsScriptRef.current?.remove(); } catch {}
-                try { scriptRef.current?.remove(); } catch {}
-                try { delete window.atOptions; } catch {}
-            };
-        } catch (err) {
-            console.warn('[AdBanner] Error:', err);
-            setVisible(false);
+            document.head.appendChild(script);
+        } else {
+            // Script already loaded — just push another serve request
+            try {
+                window.AdProvider = window.AdProvider || [];
+                window.AdProvider.push({ serve: {} });
+            } catch (e) {
+                console.warn('[AdBanner] Serve error:', e);
+            }
         }
+
+        // Check if ad rendered (ExoClick injects an iframe into <ins>)
+        const checkInterval = setInterval(() => {
+            if (ins.querySelector('iframe') || ins.children.length > 0) {
+                setLoaded(true);
+                clearInterval(checkInterval);
+            }
+        }, 500);
+
+        // Auto-hide if ad doesn't load in 6 seconds (likely blocked)
+        const timeout = setTimeout(() => {
+            if (ins.children.length === 0) {
+                console.warn('[AdBanner] Ad did not load in 6s — hiding');
+                setVisible(false);
+            }
+            clearInterval(checkInterval);
+        }, 6000);
+
+        return () => {
+            clearInterval(checkInterval);
+            clearTimeout(timeout);
+            container.innerHTML = '';
+        };
     }, [visible]);
 
     if (!visible) return null;
@@ -562,19 +567,21 @@ function AdBanner({ position = 'bottom' }) {
                 overflow: 'hidden',
                 border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
+                padding: 4,
             }}">
                 <div
                     ref="${containerRef}"
                     style="${{
-                        width: AD_CONFIG.width,
-                        height: AD_CONFIG.height,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: loaded ? '#000' : '#111',
+                        background: loaded ? 'transparent' : '#111',
+                        minWidth: loaded ? 'auto' : AD_CONFIG.width,
+                        minHeight: loaded ? 'auto' : AD_CONFIG.height,
+                        borderRadius: 4,
                     }}"
                 >
-                    ${!loaded && html`<span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>`}
+                    ${!loaded && html`<span style="${{ color: '#666', fontSize: 11, padding: 20 }}">Loading ad...</span>`}
                 </div>
                 <button
                     onClick="${() => setVisible(false)}"
