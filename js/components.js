@@ -132,19 +132,47 @@ function MobileMenu({ links, favs, onClose, navigate }) {
         document.body.style.overflow = 'hidden';
         return () => { document.body.style.overflow = ''; };
     }, []);
-    return html`<div className="fixed inset-0 z-50 md:hidden anim-fade">
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick="${onClose}"/>
-        <div className="absolute top-0 right-0 w-72 h-full bg-bg-s border-l border-bdr anim-down">
+
+    return html`<div className="fixed inset-0 z-[100] md:hidden anim-fade">
+        {/* Backdrop — solid dark overlay */}
+        <div
+            className="absolute inset-0"
+            style="${{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}"
+            onClick="${onClose}"
+        />
+        {/* Drawer panel — solid background */}
+        <div
+            className="absolute top-0 right-0 w-72 h-full border-l border-bdr anim-down"
+            style="${{ background: '#111111', boxShadow: '-8px 0 24px rgba(0,0,0,0.5)' }}"
+        >
             <div className="flex items-center justify-between p-4 border-b border-bdr">
                 <div className="flex items-center gap-2">
                     <img src="${LOGO_URL}" alt="VidsRcprime" className="h-6 w-auto object-contain"/>
                 </div>
-                <button onClick="${onClose}" className="p-2 rounded-lg text-txt-s hover:text-white" aria-label="Close menu"><${Icon} name="x" size="20"/></button>
+                <button
+                    onClick="${onClose}"
+                    className="p-2 rounded-lg text-txt-s hover:text-white hover:bg-white/10 transition-colors"
+                    aria-label="Close menu"
+                >
+                    <${Icon} name="x" size="20"/>
+                </button>
             </div>
-            <div className="p-4 flex flex-col gap-1">
-                ${links.map(l => html`<a key="${l.href}" href="${l.href}" className="px-4 py-3 rounded-lg text-txt-s hover:text-white hover:bg-white/5 transition-all font-medium" onClick="${(e) => { e.preventDefault(); navigate(l.href); onClose(); }}">${l.label}</a>`)}
-                <a href="/favorites" className="px-4 py-3 rounded-lg text-txt-s hover:text-white hover:bg-white/5 transition-all font-medium flex items-center gap-2" onClick="${(e) => { e.preventDefault(); navigate('/favorites'); onClose(); }}">
-                    <${Icon} name="heart" size="16"/> Favorites ${favs > 0 ? html`<span className="ml-auto bg-accent/20 text-accent text-xs px-2 py-0.5 rounded-full">${favs}</span>` : null}
+            <div className="p-4 flex flex-col gap-1" style="${{ background: '#111111' }}">
+                ${links.map(l => html`
+                    <a
+                        key="${l.href}"
+                        href="${l.href}"
+                        className="px-4 py-3 rounded-lg text-txt-s hover:text-white hover:bg-white/5 transition-all font-medium"
+                        onClick="${(e) => { e.preventDefault(); navigate(l.href); onClose(); }}"
+                    >${l.label}</a>
+                `)}
+                <a
+                    href="/favorites"
+                    className="px-4 py-3 rounded-lg text-txt-s hover:text-white hover:bg-white/5 transition-all font-medium flex items-center gap-2"
+                    onClick="${(e) => { e.preventDefault(); navigate('/favorites'); onClose(); }}"
+                >
+                    <${Icon} name="heart" size="16"/> Favorites
+                    ${favs > 0 ? html`<span className="ml-auto bg-accent/20 text-accent text-xs px-2 py-0.5 rounded-full">${favs}</span>` : null}
                 </a>
             </div>
         </div>
