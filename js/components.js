@@ -478,7 +478,10 @@ function SearchBar({ value, onChange, placeholder = 'Search movies and TV shows.
 // ============================================================
 function AdBanner({ position = 'bottom' }) {
     const [visible, setVisible] = useState(true);
+    const [loaded, setLoaded] = useState(false);
     const containerRef = useRef(null);
+    const scriptRef = useRef(null);
+    const optsScriptRef = useRef(null);
 
     useEffect(() => {
         if (!visible || !containerRef.current) return;
@@ -486,6 +489,7 @@ function AdBanner({ position = 'bottom' }) {
         container.innerHTML = '';
 
         try {
+            // 1. Define window.atOptions FIRST
             const optsScript = document.createElement('script');
             optsScript.type = 'text/javascript';
             optsScript.text = `
@@ -497,20 +501,49 @@ function AdBanner({ position = 'bottom' }) {
                     'params': {}
                 };
             `;
-            document.body.appendChild(optsScript);
+            document.head.appendChild(optsScript);
+            optsScriptRef.current = optsScript;
 
+            // 2. Then load the ad script
             const adScript = document.createElement('script');
             adScript.type = 'text/javascript';
             adScript.src = AD_CONFIG.src;
             adScript.async = true;
-            document.body.appendChild(adScript);
+
+            adScript.onload = () => {
+                // Check if iframe was injected by the ad network
+                setTimeout(() => {
+                    if (container.querySelector('iframe, img, ins')) {
+                        setLoaded(true);
+                    }
+                }, 1000);
+            };
+
+            adScript.onerror = () => {
+                console.warn('[AdBanner] Ad script failed to load');
+                setVisible(false);
+            };
+
+            document.head.appendChild(adScript);
+            scriptRef.current = adScript;
+
+            // 3. Auto-hide if ad didn't render within 4 seconds
+            const timeout = setTimeout(() => {
+                if (!container.querySelector('iframe, img, ins')) {
+                    console.warn('[AdBanner] Ad did not load in time (possibly blocked)');
+                    setVisible(false);
+                }
+            }, 4000);
 
             return () => {
-                try { document.body.removeChild(optsScript); } catch {}
-                try { document.body.removeChild(adScript); } catch {}
+                clearTimeout(timeout);
+                try { optsScriptRef.current?.remove(); } catch {}
+                try { scriptRef.current?.remove(); } catch {}
+                try { delete window.atOptions; } catch {}
             };
         } catch (err) {
             console.warn('[AdBanner] Error:', err);
+            setVisible(false);
         }
     }, [visible]);
 
@@ -522,7 +555,14 @@ function AdBanner({ position = 'bottom' }) {
 
     return html`
         <div className="fixed z-[9999]" style="${positionStyle}">
-            <div style="${{ position: 'relative', background: '#000', borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }}">
+            <div style="${{
+                position: 'relative',
+                background: '#000',
+                borderRadius: 8,
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
+            }}">
                 <div
                     ref="${containerRef}"
                     style="${{
@@ -531,10 +571,10 @@ function AdBanner({ position = 'bottom' }) {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: '#111',
+                        background: loaded ? '#000' : '#111',
                     }}"
                 >
-                    <span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>
+                    ${!loaded && html`<span style="${{ color: '#666', fontSize: 11 }}">Loading ad...</span>`}
                 </div>
                 <button
                     onClick="${() => setVisible(false)}"
